@@ -17,14 +17,6 @@ import { handleDownload } from '@core/Blob'
  * @description Provides static convenience methods for common HTTP verbs and a configurable request pipeline.
  */
 export default class FetchClient {
-  public static readonly CONTENT_TYPE_JSON: string = contentTypes.APPLICATION_JSON
-  public static readonly TEXT_CONTENT_TYPE: string = contentTypes.TEXT_PREFIX
-  public static readonly UNKNOWN_ERROR_MESSAGE: string = errorMessages.UNKNOWN_ERROR
-  public static readonly ABORT_ERROR_MESSAGE: string = errorMessages.ABORTED
-  public static readonly CONTENT_TYPE_NULL_MESSAGE: string = errorMessages.CONTENT_TYPE_NULL
-  public static readonly CONTENT_TYPE_HEADER: string = headers.CONTENT_TYPE
-  private static readonly STREAM_PARSE_ERROR_PREFIX: string = errorMessages.STREAM_PARSE_PREFIX
-
   private static readonly defaultConfig: {
     timeout: number
     retries: number
@@ -39,7 +31,7 @@ export default class FetchClient {
     timeout: defaults.TIMEOUT_MS,
     retries: defaults.RETRIES,
     headers: {
-      'Content-Type': FetchClient.CONTENT_TYPE_JSON
+      'Content-Type': contentTypes.APPLICATION_JSON
     },
     baseURL: defaults.BASE_URL,
     stream: defaults.STREAM,
@@ -49,6 +41,7 @@ export default class FetchClient {
 
   /**
    * Sends a GET request.
+   * @description Makes a GET request to the specified URL with optional configuration.
    * @param url - Target URL or path
    * @param options - Request configuration
    * @returns Parsed response
@@ -62,6 +55,7 @@ export default class FetchClient {
 
   /**
    * Sends a POST request.
+   * @description Makes a POST request with optional body to the specified URL.
    * @param url - Target URL or path
    * @param body - Optional request body
    * @param options - Request configuration
@@ -77,6 +71,7 @@ export default class FetchClient {
 
   /**
    * Sends a PUT request.
+   * @description Makes a PUT request with optional body to the specified URL.
    * @param url - Target URL or path
    * @param body - Optional request body
    * @param options - Request configuration
@@ -92,6 +87,7 @@ export default class FetchClient {
 
   /**
    * Sends a PATCH request.
+   * @description Makes a PATCH request with optional body to the specified URL.
    * @param url - Target URL or path
    * @param body - Optional request body
    * @param options - Request configuration
@@ -107,6 +103,7 @@ export default class FetchClient {
 
   /**
    * Sends a DELETE request.
+   * @description Makes a DELETE request to the specified URL.
    * @param url - Target URL or path
    * @param options - Request configuration
    * @returns Parsed response
@@ -120,6 +117,7 @@ export default class FetchClient {
 
   /**
    * Sends a HEAD request.
+   * @description Makes a HEAD request to the specified URL.
    * @param url - Target URL or path
    * @param options - Request configuration
    * @returns Parsed response
@@ -133,6 +131,7 @@ export default class FetchClient {
 
   /**
    * Sends an OPTIONS request.
+   * @description Makes an OPTIONS request to the specified URL.
    * @param url - Target URL or path
    * @param options - Request configuration
    * @returns Parsed response
@@ -146,6 +145,7 @@ export default class FetchClient {
 
   /**
    * Creates request options with an optional body.
+   * @description Merges base options with optional body for request configuration.
    * @param options - Base options
    * @param body - Optional body to include
    * @returns Merged options
@@ -160,6 +160,7 @@ export default class FetchClient {
 
   /**
    * Core request pipeline with validation, retries, and response parsing.
+   * @description Handles the complete request lifecycle including validation, retries, and response parsing.
    * @param method - HTTP method
    * @param url - Target URL or path
    * @param options - Request configuration
@@ -213,13 +214,19 @@ export default class FetchClient {
       throw lastError
     }
     throw new FetchError(
-      lastError instanceof Error ? lastError.message : FetchClient.UNKNOWN_ERROR_MESSAGE,
+      lastError instanceof Error ? lastError.message : errorMessages.UNKNOWN_ERROR,
       undefined,
       lastError,
       fullUrl
     )
   }
 
+  /**
+   * Honors Retry-After header if present in the error response.
+   * @description Checks for Retry-After header in error responses and waits accordingly.
+   * @param error - Error that may contain retry-after information
+   * @returns True if retry-after was honored, false otherwise
+   */
   private static async honorRetryAfterIfPresent(error: unknown): Promise<boolean> {
     const retryAfterHeader: string | undefined =
       error instanceof FetchError
@@ -238,6 +245,7 @@ export default class FetchClient {
 
   /**
    * Executes a single HTTP attempt.
+   * @description Performs a single HTTP request with timeout, error handling, and response processing.
    * @param method - HTTP method
    * @param fullUrl - Fully built URL
    * @param config - Effective configuration
@@ -304,6 +312,13 @@ export default class FetchClient {
     }
   }
 
+  /**
+   * Normalizes execution errors, converting AbortError to FetchError.
+   * @description Converts AbortError instances to FetchError for consistent error handling.
+   * @param error - Original error
+   * @param fullUrl - Request URL for error context
+   * @returns Normalized error result
+   */
   private static normalizeExecuteError(
     error: unknown,
     fullUrl: string
@@ -312,7 +327,7 @@ export default class FetchClient {
     if (name === misc.ABORT_ERROR_NAME) {
       return {
         success: false,
-        error: new FetchError(FetchClient.ABORT_ERROR_MESSAGE, undefined, error, fullUrl)
+        error: new FetchError(errorMessages.ABORTED, undefined, error, fullUrl)
       }
     }
     return { success: false, error }
@@ -320,15 +335,16 @@ export default class FetchClient {
 
   /**
    * Extracts structured error data from a response.
+   * @description Attempts to parse error response body as JSON or text based on content type.
    * @param response - Response to inspect
    * @param url - Request URL for context
    * @returns JSON or text when available; null on failure
    */
   private static async getErrorData(response: Response, url: string): Promise<unknown> {
     try {
-      const contentType: string | null = response.headers.get(FetchClient.CONTENT_TYPE_HEADER)
+      const contentType: string | null = response.headers.get(headers.CONTENT_TYPE)
       if (contentType === null) {
-        throw new FetchError(FetchClient.CONTENT_TYPE_NULL_MESSAGE, undefined, undefined, url)
+        throw new FetchError(errorMessages.CONTENT_TYPE_NULL, undefined, undefined, url)
       }
       if (isJsonContentType(contentType)) {
         return await response.json()
@@ -339,6 +355,12 @@ export default class FetchClient {
     }
   }
 
+  /**
+   * Parses Retry-After header value to milliseconds.
+   * @description Converts Retry-After header values (seconds or HTTP dates) to milliseconds.
+   * @param retryAfter - Retry-After header value (seconds or HTTP date)
+   * @returns Delay in milliseconds or null if invalid
+   */
   private static parseRetryAfterMs(retryAfter: string): number | null {
     const seconds: number = Number(retryAfter)
     if (!Number.isNaN(seconds)) {
@@ -354,6 +376,7 @@ export default class FetchClient {
 
   /**
    * Creates an async iterator over a streaming response.
+   * @description Creates an async iterator that yields typed chunks from a streaming response.
    * @param response - Source response
    * @param url - Request URL for error context
    * @returns Async iterable yielding typed chunks
@@ -367,9 +390,9 @@ export default class FetchClient {
       async *[Symbol.asyncIterator](): AsyncIterableIterator<T> {
         const reader: ReadableStreamDefaultReader<Uint8Array> = bodyStream.getReader()
         try {
-          const contentType: string | null = response.headers.get(FetchClient.CONTENT_TYPE_HEADER)
+          const contentType: string | null = response.headers.get(headers.CONTENT_TYPE)
           const isJson: boolean = isJsonContentType(contentType)
-          const isText: boolean = contentType?.startsWith(FetchClient.TEXT_CONTENT_TYPE) === true
+          const isText: boolean = contentType?.startsWith(contentTypes.TEXT_PREFIX) === true
           if (isJson) {
             yield* FetchClient.iterateNdjson<T>(reader, url)
             return
@@ -381,7 +404,7 @@ export default class FetchClient {
           yield* FetchClient.iterateBinary<T>(reader)
         } catch (error) {
           throw new FetchError(
-            `${FetchClient.STREAM_PARSE_ERROR_PREFIX}${error instanceof Error ? error.message : FetchClient.UNKNOWN_ERROR_MESSAGE}`,
+            `${errorMessages.STREAM_PARSE_PREFIX}${error instanceof Error ? error.message : errorMessages.UNKNOWN_ERROR}`,
             undefined,
             error,
             url
@@ -395,6 +418,7 @@ export default class FetchClient {
 
   /**
    * Iterates text chunks from a ReadableStream.
+   * @description Yields decoded text chunks from a ReadableStream using TextDecoder.
    * @param reader - Stream reader
    */
   private static async *iterateText<T>(
@@ -417,6 +441,7 @@ export default class FetchClient {
 
   /**
    * Iterates NDJSON chunks, yielding parsed JSON objects per line.
+   * @description Parses NDJSON stream line by line, yielding complete JSON objects.
    * @param reader - Stream reader
    * @param url - Request URL for error context
    */
@@ -448,6 +473,7 @@ export default class FetchClient {
 
   /**
    * Reads and decodes a single stream chunk.
+   * @description Reads a chunk from the stream and decodes it to a string.
    * @param reader - Stream reader
    * @param decoder - Text decoder
    * @returns Decoded string or null when complete
@@ -468,6 +494,7 @@ export default class FetchClient {
 
   /**
    * Yields complete JSON lines from a buffer.
+   * @description Processes buffer to yield complete JSON lines, updating buffer state.
    * @param buffer - Accumulated text buffer
    * @param setBuffer - Callback to update buffer after consumption
    * @param url - Request URL for error context
@@ -491,6 +518,7 @@ export default class FetchClient {
 
   /**
    * Safely parses a single JSON line.
+   * @description Parses a JSON string with error handling, yielding the parsed object.
    * @param line - JSON line string
    * @param url - Request URL for error context
    * @returns Generator yielding the parsed value
@@ -500,7 +528,7 @@ export default class FetchClient {
       yield JSON.parse(line) as T
     } catch (error) {
       throw new FetchError(
-        `${FetchClient.STREAM_PARSE_ERROR_PREFIX}${error instanceof Error ? error.message : FetchClient.UNKNOWN_ERROR_MESSAGE}`,
+        `${errorMessages.STREAM_PARSE_PREFIX}${error instanceof Error ? error.message : errorMessages.UNKNOWN_ERROR}`,
         undefined,
         error,
         url
@@ -510,6 +538,7 @@ export default class FetchClient {
 
   /**
    * Iterates binary chunks from a ReadableStream.
+   * @description Yields raw binary chunks from a ReadableStream as Uint8Array.
    * @param reader - Stream reader
    */
   private static async *iterateBinary<T>(

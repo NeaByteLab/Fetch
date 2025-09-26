@@ -19,9 +19,26 @@ HTTP client based on the Fetch API with timeout, retries, streaming, downloads, 
 
 ## 📦 Installation
 
+### NPM
 ```bash
 npm install @neabyte/fetch
 ```
+
+### CDN (Browser)
+```html
+<script type="module">
+  import fetch from 'https://cdn.jsdelivr.net/npm/@neabyte/fetch/+esm'
+
+  // Use fetch as normal
+  const data = await fetch.get('https://api.example.com/data')
+</script>
+```
+
+**CDN URLs:**
+- **ES Modules**: `https://cdn.jsdelivr.net/npm/@neabyte/fetch/+esm`
+- **Direct**: `https://unpkg.com/@neabyte/fetch@latest/dist/index.js`
+
+---
 
 ## 🚀 Quick Start
 

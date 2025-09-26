@@ -1,18 +1,19 @@
 /**
- * ESLint configuration for TypeScript Node.js project
- * Combines base JavaScript rules, TypeScript-specific rules, and code quality checks
- * @fileoverview Comprehensive linting configuration with strict TypeScript rules
+ * ESLint configuration for TypeScript projects
+ * Combines Base JavaScript rules, TypeScript-specific rules, and code quality checks
+ * @fileoverview Linting configuration with TypeScript rules
  */
 
 import js from '@eslint/js'
+import prettierConfig from 'eslint-config-prettier'
+import security from 'eslint-plugin-security'
+import sonarjs from 'eslint-plugin-sonarjs'
 import tseslint from '@typescript-eslint/eslint-plugin'
 import tsParser from '@typescript-eslint/parser'
-import prettierConfig from 'eslint-config-prettier'
-import sonarjs from 'eslint-plugin-sonarjs'
 
 /**
- * Main ESLint configuration array
- * @description Configuration array containing base rules, TypeScript rules, and ignore patterns
+ * ESLint configuration array
+ * @description Configuration array containing Base rules, TypeScript rules, and ignore patterns
  */
 export default [
   js.configs.recommended,
@@ -21,10 +22,10 @@ export default [
 
   /**
    * TypeScript-specific ESLint configuration
-   * @description Configuration object for TypeScript and TSX files with strict rules
+   * @description Configuration object for TypeScript and TSX files with rules
    */
   {
-    files: ['src/**/*.ts', 'src/**/*.tsx'],
+    files: ['src/**/**/**/**/*.ts', 'src/**/**/**/**/*.tsx'],
     ignores: ['src/scripts/**/*.ts'],
     languageOptions: {
       parser: tsParser,
@@ -35,76 +36,78 @@ export default [
       },
       globals: {
         Buffer: 'readonly',
-        console: 'readonly',
-        process: 'readonly',
-        performance: 'readonly',
-        global: 'readonly',
         __dirname: 'readonly',
         __filename: 'readonly',
-        module: 'readonly',
-        require: 'readonly',
-        exports: 'readonly',
-        setTimeout: 'readonly',
-        setInterval: 'readonly',
+        clearInterval: 'readonly',
         clearTimeout: 'readonly',
-        clearInterval: 'readonly'
+        console: 'readonly',
+        exports: 'readonly',
+        global: 'readonly',
+        module: 'readonly',
+        performance: 'readonly',
+        process: 'readonly',
+        require: 'readonly',
+        setInterval: 'readonly',
+        setTimeout: 'readonly'
       }
     },
     plugins: {
-      '@typescript-eslint': tseslint
+      '@typescript-eslint': tseslint,
+      security
     },
     rules: {
-      // Base JavaScript rules
-      'semi': ['error', 'never'],
-      'quotes': ['error', 'single'],
-      'indent': 'off',
-      'comma-dangle': ['error', 'never'],
-
-      // Coding style rules
-      'no-inline-comments': 'error',
-      'curly': ['error', 'all'],
-
-      // Best practices matching your code style
-      'prefer-const': 'error',
-      'no-var': 'error',
-      'object-shorthand': 'error',
-      'prefer-template': 'error',
-      'prefer-arrow-callback': 'error',
+      // JavaScript Rules
       'arrow-spacing': 'error',
-      'prefer-destructuring': ['error', {
-        array: false,
-        object: true
-      }],
-
-      // Error prevention
-      'no-console': 'off',
-      'no-unused-expressions': 'error',
-      'no-extra-parens': ['error', 'all', { 
-        'conditionalAssign': false,
-        'returnAssign': false,
-        'nestedBinaryExpressions': false,
-        'ignoreJSX': 'all'
-      }],
-      'no-undef': 'error',
-      'no-unreachable': 'error',
+      'comma-dangle': ['error', 'never'],
+      curly: ['error', 'all'],
+      indent: 'off',
       'no-constant-condition': 'error',
+      'no-control-regex': 'off',
       'no-duplicate-case': 'error',
       'no-empty': 'error',
       'no-empty-function': 'error',
       'no-extra-boolean-cast': 'error',
+      'no-extra-parens': [
+        'error',
+        'all',
+        {
+          conditionalAssign: false,
+          returnAssign: false,
+          nestedBinaryExpressions: false,
+          ignoreJSX: 'all'
+        }
+      ],
       'no-extra-semi': 'off',
       'no-func-assign': 'error',
+      'no-inline-comments': 'error',
       'no-inner-declarations': 'error',
       'no-invalid-regexp': 'error',
       'no-irregular-whitespace': 'error',
       'no-obj-calls': 'error',
       'no-sparse-arrays': 'error',
       'no-unexpected-multiline': 'error',
+      'no-undef': 'error',
+      'no-unreachable': 'error',
+      'no-unused-expressions': 'error',
+      'no-var': 'error',
+      'no-console': 'off',
+      'object-shorthand': 'error',
+      'prefer-arrow-callback': 'error',
+      'prefer-const': 'error',
+      'prefer-destructuring': [
+        'error',
+        {
+          array: false,
+          object: true
+        }
+      ],
+      'prefer-template': 'error',
+      quotes: ['error', 'single'],
+      semi: ['error', 'never'],
       'use-isnan': 'error',
       'valid-typeof': 'error',
-      'no-control-regex': 'off',
 
-      // TypeScript rules
+      // TypeScript Rules
       ...tseslint.configs.recommended.rules,
       '@typescript-eslint/no-unused-vars': 'error',
       '@typescript-eslint/explicit-function-return-type': 'error',
@@ -141,54 +144,50 @@ export default [
       '@typescript-eslint/restrict-plus-operands': 'error',
       '@typescript-eslint/restrict-template-expressions': 'error',
       '@typescript-eslint/strict-boolean-expressions': 'error',
-
-      // Explicit type definitions
       '@typescript-eslint/typedef': [
         'error',
         {
-          'arrowParameter': true,
-          'variableDeclaration': true,
-          'variableDeclarationIgnoreFunction': false,
-          'memberVariableDeclaration': true,
-          'objectDestructuring': true,
-          'parameter': true,
-          'propertyDeclaration': true,
-          'arrayDestructuring': true
+          arrayDestructuring: true,
+          arrowParameter: true,
+          memberVariableDeclaration: true,
+          objectDestructuring: true,
+          parameter: true,
+          propertyDeclaration: true,
+          variableDeclaration: true,
+          variableDeclarationIgnoreFunction: false
         }
       ],
-
-      // Naming conventions
       '@typescript-eslint/naming-convention': [
         'error',
         {
-          'selector': 'variable',
-          'format': ['camelCase'],
-          'leadingUnderscore': 'forbid',
-          'trailingUnderscore': 'forbid'
+          selector: 'variable',
+          format: ['camelCase'],
+          leadingUnderscore: 'forbid',
+          trailingUnderscore: 'forbid'
         },
         {
-          'selector': 'function',
-          'format': ['camelCase']
+          selector: 'function',
+          format: ['camelCase']
         },
         {
-          'selector': 'class',
-          'format': ['PascalCase']
+          selector: 'class',
+          format: ['PascalCase']
         },
         {
-          'selector': 'interface',
-          'format': ['PascalCase']
+          selector: 'interface',
+          format: ['PascalCase']
         },
         {
-          'selector': 'typeAlias',
-          'format': ['PascalCase']
+          selector: 'typeAlias',
+          format: ['PascalCase']
         },
         {
-          'selector': 'enum',
-          'format': ['PascalCase']
+          selector: 'enum',
+          format: ['PascalCase']
         },
         {
-          'selector': 'enumMember',
-          'format': ['UPPER_CASE']
+          selector: 'enumMember',
+          format: ['UPPER_CASE']
         }
       ],
 
@@ -239,17 +238,23 @@ export default [
       'sonarjs/prefer-object-literal': 'error',
       'sonarjs/prefer-promise-shorthand': 'error',
       'sonarjs/prefer-type-guard': 'error',
-      'sonarjs/use-type-alias': 'error'
+      'sonarjs/use-type-alias': 'error',
+
+      // Security Vulnerability Detection
+      'security/detect-buffer-noassert': 'warn',
+      'security/detect-child-process': 'warn',
+      'security/detect-disable-mustache-escape': 'warn',
+      'security/detect-eval-with-expression': 'error',
+      'security/detect-new-buffer': 'warn',
+      'security/detect-no-csrf-before-method-override': 'warn',
+      'security/detect-non-literal-regexp': 'warn',
+      'security/detect-non-literal-require': 'warn',
+      'security/detect-possible-timing-attacks': 'warn',
+      'security/detect-pseudoRandomBytes': 'warn',
+      'security/detect-unsafe-regex': 'warn'
     }
   },
   {
-    ignores: [
-      'node_modules/**',
-      'dist/**',
-      '**/*.js',
-      '**/*.d.ts',
-      '**/*.txt',
-      '**/*.md'
-    ]
+    ignores: ['node_modules/**', 'dist/**', '**/*.js', '**/*.d.ts', '**/*.txt', '**/*.md']
   }
 ]

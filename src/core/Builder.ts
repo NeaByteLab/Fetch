@@ -55,7 +55,6 @@ export function buildRequestInit(
         requestInit.headers.delete('Content-Type')
       }
     } else if (typeof reqBody === 'object' && reqBody != null) {
-      // Ensure a sensible default Content-Type when serializing objects
       config.headers['Content-Type'] ??= contentTypes.APPLICATION_JSON
       requestInit.body = serializeObjectBody(reqBody as Record<string, unknown>, config.headers)
     } else {

@@ -1,6 +1,5 @@
 import { contentTypes, httpMethods, headers, errorMessages, misc } from '@constants/index'
 import { FetchError } from '@interfaces/index'
-import FetchClient from '@core/Fetch'
 
 /**
  * Parses a response by inspecting its content type.
@@ -15,7 +14,7 @@ export async function parseResponse<T>(response: Response, url: string = 'unknow
   if (contentType === null) {
     throw new FetchError(errorMessages.CONTENT_TYPE_NULL, undefined, null, url)
   }
-  if (contentType.includes(FetchClient.CONTENT_TYPE_JSON)) {
+  if (contentType.includes(contentTypes.APPLICATION_JSON)) {
     return (await response.json()) as T
   }
   if (contentType.includes(contentTypes.TEXT_PREFIX)) {
@@ -32,7 +31,7 @@ export async function parseResponse<T>(response: Response, url: string = 'unknow
  * @returns True if JSON content type
  */
 export function isJsonContentType(contentType: string | null): boolean {
-  return contentType?.includes(FetchClient.CONTENT_TYPE_JSON) === true
+  return contentType?.includes(contentTypes.APPLICATION_JSON) === true
 }
 
 /**
@@ -42,7 +41,7 @@ export function isJsonContentType(contentType: string | null): boolean {
  * @returns True if text content type
  */
 export function isTextContentType(contentType: string | null): boolean {
-  return contentType?.includes(FetchClient.TEXT_CONTENT_TYPE) === true
+  return contentType?.includes(contentTypes.TEXT_PREFIX) === true
 }
 
 /**
