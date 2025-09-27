@@ -1,5 +1,4 @@
-import type { FetchResponse } from '@interfaces/index'
-import { FetchError } from '@interfaces/index'
+import { FetchError, type FetchResponse } from '@interfaces/index'
 import { errorMessages } from '@constants/index'
 import { shouldRetry, waitForRetry } from '@utils/index'
 

@@ -1,6 +1,6 @@
 import { FetchError } from '@interfaces/index'
 import { errorMessages, misc } from '@constants/index'
-import { isJsonContentType } from '@utils/index'
+import { parseErrorResponse } from '@utils/index'
 
 /**
  * Error handling utilities.
@@ -35,19 +35,8 @@ export class ErrorHandler {
    * @param url - Request URL for context
    * @returns JSON or text when available; null on failure
    */
-  static async getErrorData(response: Response, url: string): Promise<unknown> {
-    try {
-      const contentType: string | null = response.headers.get('Content-Type')
-      if (contentType === null) {
-        throw new FetchError(errorMessages.CONTENT_TYPE_NULL, undefined, undefined, url)
-      }
-      if (isJsonContentType(contentType)) {
-        return await response.json()
-      }
-      return await response.text()
-    } catch {
-      return null
-    }
+  static async getErrorData(response: Response): Promise<unknown> {
+    return parseErrorResponse(response)
   }
 
   /**

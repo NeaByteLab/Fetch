@@ -157,8 +157,9 @@ async function saveBlob(blob: Blob, filename: string): Promise<void> {
       URL.revokeObjectURL(objectUrl)
     }
   } else {
-    const fs: typeof import('node:fs') = await import('node:fs')
+    const { writeFileSync }: { writeFileSync: typeof import('node:fs').writeFileSync } =
+      await import('node:fs')
     const buffer: ArrayBuffer = await blob.arrayBuffer()
-    fs.writeFileSync(filename, Buffer.from(buffer))
+    writeFileSync(filename, Buffer.from(buffer))
   }
 }

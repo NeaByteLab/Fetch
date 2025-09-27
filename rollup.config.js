@@ -14,7 +14,7 @@ import dts from 'rollup-plugin-dts'
  * External dependencies for bundling.
  * @description Dependencies that should not be bundled.
  */
-const external = ['node:fs']
+const external = ['node:fs', 'fs']
 /**
  * Base plugin configuration for all builds.
  * @description Core plugins for TypeScript compilation and module resolution.
@@ -139,7 +139,8 @@ export default [
       sourcemap: false,
       exports: 'named',
       globals: {
-        'node:fs': 'fs'
+        'node:fs': 'fs',
+        fs: 'fs'
       }
     },
     external: external,
@@ -159,7 +160,8 @@ export default [
       sourcemap: false,
       exports: 'named',
       globals: {
-        'node:fs': 'fs'
+        'node:fs': 'fs',
+        fs: 'fs'
       }
     },
     external: external,

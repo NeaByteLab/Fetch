@@ -209,7 +209,6 @@ function calculateBodySize(body: BodyInit): number {
     return body.size
   }
   if (body instanceof FormData || body instanceof URLSearchParams) {
-    // Will be updated as we read
     return 1
   }
   return 1

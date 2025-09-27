@@ -9,33 +9,15 @@ HTTP client with timeout, retries, streaming, downloads, and error handling for 
 
 ## ✨ Features
 
-### 🌐 **Core**
-- Works in browser and Node.js
-- HTTP methods: GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS
-- Request cancellation via AbortSignal
-
-### 📦 **Request Support**
-- JSON objects (auto-serialized)
-- FormData and URLSearchParams
-- Binary data: Blob, ArrayBuffer, Uint8Array
-- Plain objects and strings
-
-### 🔄 **Reliability**
-- Retries with exponential backoff and jitter
-- Honors Retry-After headers from servers
-- Configurable timeouts (default: 30s)
-- Input validation for URLs and configuration
-
-### 📡 **Additional Features**
-- Content-type detection and parsing
-- Streaming responses: NDJSON, text, and binary
-- File downloads for browser and Node.js
-- Progress tracking for both uploads and downloads
-
-### ⚠️ **Error Handling**
-- Custom FetchError with status codes and response data
-- Structured error messages
-- Network error handling
+- 🌐 **Universal Support** - Browser and Node.js
+- ❌ **Request Cancellation** - AbortSignal support
+- ⏱️ **Timeout Control** - Configurable timeouts (default: 30s)
+- 🔄 **Retry Logic** - Exponential backoff with Retry-After header support
+- 📡 **NDJSON Streaming** - Real-time JSON processing
+- 📊 **Progress Tracking** - Upload and download progress
+- 📦 **Request Bodies** - JSON, FormData, URLSearchParams, binary data
+- 📥 **File Downloads** - Cross-platform file downloads
+- 🛡️ **Error Handling** - Structured errors with full context
 
 ---
 

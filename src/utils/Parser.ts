@@ -2,17 +2,48 @@ import { contentTypes, httpMethods, headers, errorMessages, misc } from '@consta
 import { FetchError } from '@interfaces/index'
 
 /**
+ * Attempts to parse JSON with fallback to text.
+ * @description Tries to parse response as JSON, falls back to text on failure.
+ * @param response - Response to parse
+ * @returns Parsed data
+ */
+async function parseJsonWithFallback<T>(response: Response): Promise<T> {
+  try {
+    return (await response.json()) as T
+  } catch (jsonError) {
+    try {
+      const text: string = await response.text()
+      console.warn(
+        'Failed to parse JSON, falling back to text:',
+        jsonError instanceof Error ? jsonError.message : errorMessages.UNKNOWN_ERROR
+      )
+      return text as T
+    } catch (textError) {
+      console.warn('Failed to parse response as JSON or text:', {
+        jsonError: jsonError instanceof Error ? jsonError.message : errorMessages.UNKNOWN_ERROR,
+        textError: textError instanceof Error ? textError.message : errorMessages.UNKNOWN_ERROR
+      })
+      return undefined as T
+    }
+  }
+}
+
+/**
  * Parses a response by inspecting its content type.
  * @description Returns JSON, text, or ArrayBuffer based on the `Content-Type` header.
  * @param response - The response to parse
  * @param url - Optional request URL for contextual error messages
  * @returns Parsed response data
- * @throws {FetchError} When the content type header is missing
  */
-export async function parseResponse<T>(response: Response, url: string = 'unknown'): Promise<T> {
+export async function parseResponse<T>(response: Response): Promise<T> {
   const contentType: string | null = response.headers.get(headers.CONTENT_TYPE)
   if (contentType === null) {
-    throw new FetchError(errorMessages.CONTENT_TYPE_NULL, undefined, null, url)
+    try {
+      return (await response.text()) as T
+    } catch {
+      const arrayBuffer: ArrayBuffer = await response.arrayBuffer()
+      return Object.assign(arrayBuffer, { length: arrayBuffer.byteLength }) as T
+    }
   }
   if (contentType.includes(contentTypes.APPLICATION_JSON)) {
     return (await response.json()) as T
@@ -61,16 +92,7 @@ export async function parseByContentType<T>(
     return undefined as T
   }
   if (isJsonContentType(contentType)) {
-    try {
-      return (await response.json()) as T
-    } catch {
-      try {
-        const text: string = await response.text()
-        return text as T
-      } catch {
-        return undefined as T
-      }
-    }
+    return parseJsonWithFallback<T>(response)
   }
   if (isTextContentType(contentType)) {
     return (await response.text()) as T
@@ -84,7 +106,6 @@ export async function parseByContentType<T>(
  * @description Honors a requested response type when provided, otherwise infers from content type and method.
  * @param response - The response to parse
  * @param config - Parsing configuration containing the response type
- * @param url - Request URL for fallback parsing
  * @param method - Optional HTTP method
  * @returns Parsed response data
  */
@@ -93,7 +114,6 @@ export async function parseResponseByType<T>(
   config: {
     responseType: 'auto' | 'json' | 'text' | 'buffer' | 'blob'
   },
-  url: string,
   method?: string
 ): Promise<T> {
   const contentType: string | null = response.headers.get(headers.CONTENT_TYPE)
@@ -103,16 +123,7 @@ export async function parseResponseByType<T>(
   if (config.responseType !== 'auto') {
     switch (config.responseType) {
       case 'json':
-        try {
-          return (await response.json()) as T
-        } catch {
-          try {
-            const text: string = await response.text()
-            return text as T
-          } catch {
-            return undefined as T
-          }
-        }
+        return parseJsonWithFallback<T>(response)
       case 'text':
         return (await response.text()) as T
       case 'buffer': {
@@ -122,7 +133,7 @@ export async function parseResponseByType<T>(
       case 'blob':
         return (await response.blob()) as T
       default:
-        return parseResponse<T>(response, url)
+        return parseResponse<T>(response)
     }
   }
   return parseByContentType<T>(response, contentType, method)
@@ -146,9 +157,15 @@ export async function parseResponseWithProgressTracking<T>(
   method?: string
 ): Promise<T> {
   const contentLength: string | null = response.headers.get(headers.CONTENT_LENGTH)
-  const total: number = contentLength !== null ? parseInt(contentLength, 10) : 0
+  const total: number =
+    contentLength !== null
+      ? ((): number => {
+          const parsed: number = parseInt(contentLength, 10)
+          return Number.isNaN(parsed) ? 0 : parsed
+        })()
+      : 0
   if (response.body === null) {
-    return parseResponseByType<T>(response, { responseType: 'auto' }, url, method)
+    return parseResponseByType<T>(response, { responseType: 'auto' }, method)
   }
   const reader: ReadableStreamDefaultReader<Uint8Array> = response.body.getReader()
   const chunks: Uint8Array[] = []
@@ -172,7 +189,7 @@ export async function parseResponseWithProgressTracking<T>(
       }
     }
     if (chunks.length === 0) {
-      return await parseResponseByType<T>(response, { responseType: 'auto' }, url, method)
+      return await parseResponseByType<T>(response, { responseType: 'auto' }, method)
     }
     const buffer: ArrayBuffer = new ArrayBuffer(received)
     const allChunks: Uint8Array = new Uint8Array(buffer)
@@ -189,7 +206,7 @@ export async function parseResponseWithProgressTracking<T>(
       statusText: response.statusText,
       headers: response.headers
     })
-    return await parseResponseByType<T>(newResponse, { responseType: 'auto' }, url, method)
+    return await parseResponseByType<T>(newResponse, { responseType: 'auto' }, method)
   } finally {
     reader.releaseLock()
   }
@@ -221,5 +238,27 @@ export async function parseResponseWithProgress<T>(
       method
     )
   }
-  return parseResponseByType<T>(response, { responseType: config.responseType }, url, method)
+  return parseResponseByType<T>(response, { responseType: config.responseType }, method)
+}
+
+/**
+ * Parses an error response for better error handling.
+ * @description Attempts to parse error response as JSON or text for detailed error information.
+ * @param response - The error response to parse
+ * @param url - Request URL for error context
+ * @returns Parsed error data or null if parsing fails
+ */
+export async function parseErrorResponse(response: Response): Promise<unknown> {
+  try {
+    const contentType: string | null = response.headers.get(headers.CONTENT_TYPE)
+    if (contentType === null) {
+      return null
+    }
+    if (isJsonContentType(contentType)) {
+      return await response.json()
+    }
+    return await response.text()
+  } catch {
+    return null
+  }
 }
