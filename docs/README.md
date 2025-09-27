@@ -31,15 +31,21 @@ import fetch from '@neabyte/fetch'
 
 // TypeScript types
 import type {
+  BalancerConfig,
   FetchError,
   FetchOptions,
-  FetchResponse,
   FetchRequestBody,
+  FetchResponse,
+  ForwarderEndpoint,
   TimeoutController
 } from '@neabyte/fetch'
 
+// Additional handlers (optional)
+import { BalancerHandler, ForwarderHandler } from '@neabyte/fetch'
+
 // Utility function
 import { createHeaders } from '@neabyte/fetch'
+
 ```
 
 ### Configuration Options
@@ -54,6 +60,12 @@ interface FetchOptions {
   stream?: boolean                       // Enable streaming response (default: false)
   download?: boolean                     // Enable file download (default: false)
   filename?: string                      // Filename for download (required if download: true)
+
+  // Additional features
+  body?: FetchRequestBody                // Request body data
+  maxRate?: number                       // Rate limiting in bytes per second
+  balancer?: BalancerConfig              // Load balancer configuration
+  forwarder?: ForwarderEndpoint[]        // Response forwarding configuration
 
   // Response parsing type (default: 'auto')
   responseType?: 'auto' | 'json' | 'text' | 'buffer' | 'blob'
