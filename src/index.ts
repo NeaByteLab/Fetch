@@ -4,6 +4,10 @@
  */
 export { default } from '@core/Fetch'
 export type {
+  AuthApiKey,
+  AuthBasic,
+  AuthBearer,
+  AuthConfig,
   BalancerConfig,
   BalancerExecutor,
   BalancerResult,
@@ -19,5 +23,5 @@ export type {
   ForwarderResult,
   TimeoutController
 } from '@interfaces/index'
-export { createHeaders } from '@utils/index'
+export { createHeaders, createAuthHeaders } from '@utils/index'
 export { BalancerHandler, ForwarderHandler } from '@core/index'

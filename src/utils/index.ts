@@ -121,6 +121,12 @@ export function createHeaders(headers: Record<string, string> = {}): Headers {
 }
 
 /**
+ * Re-exports authentication utilities.
+ * @description Provides authentication helpers for Basic, Bearer, and API key auth.
+ */
+export * from '@utils/Auth'
+
+/**
  * Re-exports parsing utilities.
  * @description Provides response parsing helpers from the parser module.
  */

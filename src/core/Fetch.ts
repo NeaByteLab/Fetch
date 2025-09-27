@@ -1,5 +1,6 @@
 import {
   FetchError,
+  type AuthConfig,
   type FetchOptions,
   type FetchRequestBody,
   type FetchResponse,
@@ -20,6 +21,7 @@ import {
 import {
   cleanupController,
   createTimeoutController,
+  createAuthHeaders,
   honorRetryAfterIfPresent,
   parseResponseWithProgress
 } from '@utils/index'
@@ -204,6 +206,7 @@ export default class FetchClient {
     const config: typeof FetchClient.defaultConfig & {
       signal?: AbortSignal
       body?: FetchRequestBody
+      auth?: AuthConfig
       balancer?: { endpoints: string[]; strategy: 'fastest' | 'parallel' }
       forwarder?: ForwarderEndpoint<T>[]
     } = {
@@ -240,6 +243,10 @@ export default class FetchClient {
       return response
     }
     const fullUrl: string = buildUrl(url, config.baseURL)
+    if (config.auth !== undefined) {
+      const authHeaders: Record<string, string> = createAuthHeaders(config.auth)
+      config.headers = { ...config.headers, ...authHeaders }
+    }
     const response: FetchResponse<T> = await RetryHandler.executeWithRetries<T>(
       fullUrl,
       {
@@ -389,6 +396,7 @@ export default class FetchClient {
     config: typeof FetchClient.defaultConfig & {
       signal?: AbortSignal
       body?: FetchRequestBody
+      auth?: AuthConfig
       balancer: { endpoints: string[]; strategy: 'fastest' | 'parallel' }
       forwarder?: ForwarderEndpoint<T>[]
     }
@@ -402,6 +410,11 @@ export default class FetchClient {
           endpoint: string
         ): Promise<{ success: true; data: T } | { success: false; error: unknown }> => {
           try {
+            const balancerConfig: typeof baseConfig = { ...baseConfig }
+            if (balancerConfig.auth !== undefined) {
+              const authHeaders: Record<string, string> = createAuthHeaders(balancerConfig.auth)
+              balancerConfig.headers = { ...balancerConfig.headers, ...authHeaders }
+            }
             const response: FetchResponse<T> = await RetryHandler.executeWithRetries<T>(
               endpoint,
               {
@@ -410,7 +423,7 @@ export default class FetchClient {
                 download: baseConfig.download,
                 ...baseConfig.filename !== undefined ? { filename: baseConfig.filename } : {}
               },
-              () => this.executeRequest<T>(method, endpoint, baseConfig),
+              () => this.executeRequest<T>(method, endpoint, balancerConfig),
               honorRetryAfterIfPresent
             )
             return { success: true, data: response as T }

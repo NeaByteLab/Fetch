@@ -32,6 +32,10 @@ import fetch from '@neabyte/fetch'
 
 // TypeScript types
 import type {
+  AuthApiKey,
+  AuthBasic,
+  AuthBearer,
+  AuthConfig,
   BalancerConfig,
   FetchError,
   FetchOptions,
@@ -44,8 +48,8 @@ import type {
 // Additional handlers (optional)
 import { BalancerHandler, ForwarderHandler } from '@neabyte/fetch'
 
-// Utility function
-import { createHeaders } from '@neabyte/fetch'
+// Utility functions
+import { createHeaders, createAuthHeaders } from '@neabyte/fetch'
 
 ```
 
@@ -53,14 +57,23 @@ import { createHeaders } from '@neabyte/fetch'
 
 ```typescript
 interface FetchOptions {
+  // Authentication
+  auth?: AuthConfig                      // Authentication configuration (Basic, Bearer, API Key)
+
+  // Basic configuration
   timeout?: number                       // Request timeout in ms (default: 30000)
   retries?: number                       // Number of retry attempts (default: 1)
   headers?: Record<string, string>       // Additional headers
   baseURL?: string                       // Base URL for relative URLs
   signal?: AbortSignal                   // Abort signal for cancellation
+
+  // Response handling
   stream?: boolean                       // Enable streaming response (default: false)
   download?: boolean                     // Enable file download (default: false)
   filename?: string                      // Filename for download (required if download: true)
+
+  // Response parsing type (default: 'auto')
+  responseType?: 'auto' | 'json' | 'text' | 'buffer' | 'blob'
 
   // Additional features
   body?: FetchRequestBody                // Request body data
@@ -68,8 +81,6 @@ interface FetchOptions {
   balancer?: BalancerConfig              // Load balancer configuration
   forwarder?: ForwarderEndpoint[]        // Response forwarding configuration
 
-  // Response parsing type (default: 'auto')
-  responseType?: 'auto' | 'json' | 'text' | 'buffer' | 'blob'
   // Progress callback for uploads and downloads
   onProgress?: (percentage: number) => void
 }
@@ -82,6 +93,7 @@ interface FetchOptions {
 Detailed examples are organized by category:
 
 - [Basic Usage](./examples/basic-usage.md) - HTTP methods and common usage patterns
+- [Authentication](./examples/authentication.md) - Basic, Bearer, and API key authentication
 - [Advanced Usage](./examples/advanced-usage.md) - Configuration options and patterns
 - [Error Handling](./examples/error-handling.md) - Error handling patterns
 - [Request Balancer](./examples/request-balancer.md) - Load balancing and failover examples

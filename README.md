@@ -48,9 +48,12 @@
   </table>
 </div>
 
+<br/>
+
 ## ✨ Features
 
 - 🌐 **Universal Support** - Browser and Node.js
+- 🔐 **Authentication** - Basic, Bearer, and API key authentication
 - ❌ **Request Cancellation** - `AbortSignal` support
 - ⏱️ **Timeout Control** - Configurable timeouts (default: 30s)
 - 🔄 **Retry Logic** - Exponential backoff with Retry-After header support
@@ -142,7 +145,6 @@ For detailed examples and usage patterns, see the [documentation](./docs/README.
 ## 🗺️ Roadmap
 
 ### 🔮 **Planned Features**
-- [ ] **Authentication Helpers** - Basic, Bearer, and API key auth
 - [ ] **Cookie Management** - Cookie handling
 - [ ] **HTTP Proxy Support** - HTTP proxy connections
 - [ ] **Proxy Authentication** - Username/password for proxies

@@ -604,4 +604,171 @@ test.describe('@neabyte/fetch Module Loading Tests', () => {
       expect(result.isBlob).toBe(true)
     })
   })
+
+  test.describe('Authentication', () => {
+    test('should handle basic authentication', async () => {
+      const result = await page.evaluate(async () => {
+        try {
+          const data = await window.fetchClient.get(
+            'https://httpbin.org/basic-auth/testuser/testpass',
+            {
+              auth: {
+                type: 'basic',
+                username: 'testuser',
+                password: 'testpass'
+              }
+            }
+          )
+          return {
+            success: true,
+            authenticated: data.authenticated,
+            user: data.user
+          }
+        } catch (error) {
+          return {
+            success: false,
+            error: error.message
+          }
+        }
+      })
+      expect(result.success).toBe(true)
+      expect(result.authenticated).toBe(true)
+      expect(result.user).toBe('testuser')
+    })
+
+    test('should handle bearer token authentication', async () => {
+      const result = await page.evaluate(async () => {
+        try {
+          const data = await window.fetchClient.get('https://httpbin.org/bearer', {
+            auth: {
+              type: 'bearer',
+              token: 'test-bearer-token-123'
+            }
+          })
+          return {
+            success: true,
+            authenticated: data.authenticated,
+            token: data.token
+          }
+        } catch (error) {
+          return {
+            success: false,
+            error: error.message
+          }
+        }
+      })
+      expect(result.success).toBe(true)
+      expect(result.authenticated).toBe(true)
+      expect(result.token).toBe('test-bearer-token-123')
+    })
+
+    test('should handle API key authentication', async () => {
+      const result = await page.evaluate(async () => {
+        try {
+          const data = await window.fetchClient.get('https://httpbin.org/headers', {
+            auth: {
+              type: 'apikey',
+              key: 'X-API-Key',
+              value: 'test-api-key-456'
+            }
+          })
+          return {
+            success: true,
+            apiKeySent: data.headers['X-Api-Key'] || data.headers['X-API-Key']
+          }
+        } catch (error) {
+          return {
+            success: false,
+            error: error.message
+          }
+        }
+      })
+      expect(result.success).toBe(true)
+      expect(result.apiKeySent).toBe('test-api-key-456')
+    })
+
+    test('should handle custom API key header', async () => {
+      const result = await page.evaluate(async () => {
+        try {
+          const data = await window.fetchClient.get('https://httpbin.org/headers', {
+            auth: {
+              type: 'apikey',
+              key: 'X-Custom-Auth',
+              value: 'custom-key-789'
+            }
+          })
+          return {
+            success: true,
+            customKeySent: data.headers['X-Custom-Auth']
+          }
+        } catch (error) {
+          return {
+            success: false,
+            error: error.message
+          }
+        }
+      })
+      expect(result.success).toBe(true)
+      expect(result.customKeySent).toBe('custom-key-789')
+    })
+
+    test('should handle authentication with POST request', async () => {
+      const result = await page.evaluate(async () => {
+        try {
+          const data = await window.fetchClient.post(
+            'https://httpbin.org/post',
+            {
+              name: 'John Doe',
+              email: 'john@example.com'
+            },
+            {
+              auth: {
+                type: 'bearer',
+                token: 'post-test-token'
+              }
+            }
+          )
+          return {
+            success: true,
+            hasAuthHeader: !!data.headers['Authorization'],
+            authValue: data.headers['Authorization']
+          }
+        } catch (error) {
+          return {
+            success: false,
+            error: error.message
+          }
+        }
+      })
+      expect(result.success).toBe(true)
+      expect(result.hasAuthHeader).toBe(true)
+      expect(result.authValue).toBe('Bearer post-test-token')
+    })
+
+    test('should handle authentication errors', async () => {
+      const result = await page.evaluate(async () => {
+        try {
+          await window.fetchClient.get('https://httpbin.org/basic-auth/testuser/testpass', {
+            auth: {
+              type: 'basic',
+              username: 'wronguser',
+              password: 'wrongpass'
+            }
+          })
+          return {
+            success: true,
+            shouldHaveFailed: false
+          }
+        } catch (error) {
+          return {
+            success: false,
+            error: error.message,
+            shouldHaveFailed: true
+          }
+        }
+      })
+      expect(result.shouldHaveFailed).toBe(true)
+      expect(result.error).toContain('401')
+    })
+  })
 })

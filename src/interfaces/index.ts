@@ -1,8 +1,9 @@
 /**
  * Public interfaces and types.
- * @description Re-exports request, response, and timeout related types.
+ * @description Re-exports all interface and type definitions.
  */
-export * from '@interfaces/Fetch'
-export * from '@interfaces/Timeout'
+export * from '@interfaces/Auth'
 export * from '@interfaces/Balancer'
+export * from '@interfaces/Fetch'
 export * from '@interfaces/Forwarder'
+export * from '@interfaces/Timeout'

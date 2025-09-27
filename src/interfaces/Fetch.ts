@@ -1,4 +1,4 @@
-import type { BalancerConfig, ForwarderEndpoint } from '@interfaces/index'
+import type { BalancerConfig, ForwarderEndpoint, AuthConfig } from '@interfaces/index'
 
 /**
  * Response value returned by the client.
@@ -24,6 +24,8 @@ export type FetchRequestBody =
  * @description HTTP request configuration options.
  */
 export interface FetchOptions {
+  /** Authentication configuration */
+  auth?: AuthConfig
   /** Load balancer configuration */
   balancer?: BalancerConfig
   /** Base URL for relative requests */
