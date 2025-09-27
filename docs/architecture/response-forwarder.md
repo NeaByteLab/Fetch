@@ -55,15 +55,13 @@ graph TD
 - **Purpose**: Manages response forwarding logic
 - **Key Methods**:
   - `forwardResponse()` - Fire-and-forget forwarding
-  - `forwardResponseWithCallback()` - Forwarding with completion callback
   - `createConfig()` - Helper to create config from URL array
   - `createConfigFromForwarders()` - Helper to create config from ForwarderEndpoint array
 - **Responsibilities**:
   - Validates forwarder configurations
   - Executes fire-and-forget forwarding
   - Handles individual forwarder failures
-  - Logs forwarding results
-  - Provides callback-based forwarding for monitoring
+  - Logs forwarding results automatically
 
 ### 📝 ForwarderConfig Interface
 ```typescript
@@ -111,24 +109,24 @@ type ForwarderBodyFunction<T = unknown> = (originalResponse: T) => unknown
 
 **Code Flow**: Parallel execution with fire-and-forget completion logging.
 
-### 2. 📞 Callback Strategy
+### 2. 🔍 Automatic Logging Strategy
 
-**Behavior**: Sends responses with optional completion callback using `forwardResponseWithCallback()`.
+**Behavior**: Sends responses with automatic result logging and error tracking.
 
 **Process**:
 1. Validates forwarder configuration
 2. Executes all forwards in parallel
-3. Collects all results
-4. Calls completion callback with results
+3. Automatically logs all results
+4. Tracks success/failure rates
 5. Returns original response
 
 **Use Cases**:
-- Monitoring forwarder success rates
-- Custom error handling
-- Real-time status updates
+- Automatic monitoring and observability
+- Built-in error tracking
 - Debugging and troubleshooting
+- Performance monitoring
 
-**Code Flow**: Parallel execution with optional completion callback handling.
+**Code Flow**: Parallel execution with automatic logging and monitoring.
 
 ## ❌ Error Handling
 
@@ -191,11 +189,11 @@ Configure forwarder with array of endpoints, methods, headers, and optional body
 - **Resource Usage**: Medium (parallel execution)
 - **Reliability**: High (individual failures don't affect main response)
 
-### 📞 Callback Strategy
+### 🔍 Automatic Logging Strategy
 - **Latency**: O(1) - doesn't affect main response time
 - **Success Rate**: High (retry logic per forwarder)
 - **Resource Usage**: Medium (parallel execution)
-- **Monitoring**: Excellent (completion callbacks)
+- **Monitoring**: Excellent (automatic logging and tracking)
 
 ## 🔒 Thread Safety
 

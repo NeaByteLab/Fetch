@@ -192,53 +192,35 @@ const response = await fetch.get('/api/data', {
       method: 'POST',
       url: 'https://analytics.example.com/api/events'
     }
-  ],
-  onComplete: (results) => {
-    const successful = results.filter(r => r.success).length
-    const failed = results.length - successful
-
-    console.log(`Forwarding complete: ${successful} successful, ${failed} failed`)
-
-    // Log individual failures
-    results.forEach(result => {
-      if (!result.success) {
-        console.error(`Failed to forward to ${result.endpoint}:`, result.error)
-      }
-    })
-  }
+  ]
 })
+// Forwarding happens automatically in the background
+// Results are logged automatically by the system
 ```
 
-### Custom Error Handling
+### Fire-and-Forget Forwarding
 
 ```typescript
-// Custom error handling for forwarders
+// Fire-and-forget forwarding with automatic error handling
 const response = await fetch.get('/api/data', {
   forwarder: [
     {
       method: 'POST',
-      url: 'https://critical-service.example.com/api/data'
+      url: 'https://critical-service.example.com/api/data',
+      retries: 3,  // More retries for critical services
+      timeout: 5000
     },
     {
       method: 'POST',
-      url: 'https://optional-service.example.com/api/data'
+      url: 'https://optional-service.example.com/api/data',
+      retries: 1,  // Fewer retries for optional services
+      timeout: 2000
     }
-  ],
-  onComplete: (results) => {
-    results.forEach(result => {
-      if (!result.success) {
-        if (result.endpoint.includes('critical-service')) {
-          // Alert for critical service failures
-          console.error('CRITICAL: Failed to forward to critical service')
-          // Send alert notification
-        } else {
-          // Log optional service failures
-          console.warn('Optional service forwarding failed:', result.error)
-        }
-      }
-    })
-  }
+  ]
 })
+// All forwarding happens in background
+// Errors are automatically logged and handled
+// Main response returns immediately
 ```
 
 ## 🔧 Advanced Configuration
@@ -543,16 +525,10 @@ const response = await fetch.get('/api/data', {
       method: 'POST',
       url: 'https://analytics.example.com/api/events'
     }
-  ],
-  onComplete: (results) => {
-    results.forEach(result => {
-      if (!result.success) {
-        console.error(`Forwarder failed for ${result.endpoint}:`, result.error)
-        // Implement retry logic or alerting here
-      }
-    })
-  }
+  ]
 })
+// Forwarding happens automatically in background
+// Errors are automatically logged and handled
 ```
 
 ### Graceful Degradation
@@ -569,18 +545,10 @@ const response = await fetch.get('/api/data', {
       method: 'POST',
       url: 'https://optional-analytics.example.com/api/events'
     }
-  ],
-  onComplete: (results) => {
-    const criticalFailures = results.filter(r =>
-      !r.success && r.endpoint.includes('critical-logs')
-    )
-
-    if (criticalFailures.length > 0) {
-      console.error('Critical logging failed - investigate immediately')
-      // Send alert to monitoring system
-    }
-  }
+  ]
 })
+// Fire-and-forget forwarding with automatic error handling
+// Critical vs optional services handled via retry/timeout config
 ```
 
 ## 🔄 Retry Integration
@@ -692,24 +660,10 @@ const response = await fetch.get('/api/data', {
       method: 'POST',
       url: 'https://service.example.com/api/data'
     }
-  ],
-  onComplete: (results) => {
-    // Always check results
-    results.forEach(result => {
-      if (!result.success) {
-        // Log errors appropriately
-        console.error(`Forwarder failed: ${result.endpoint}`, result.error)
-
-        // Implement appropriate action based on criticality
-        if (result.endpoint.includes('critical')) {
-          // Alert for critical failures
-        } else {
-          // Log for non-critical failures
-        }
-      }
-    })
-  }
+  ]
 })
+// Fire-and-forget forwarding with automatic error handling
+// All errors are automatically logged and tracked
 ```
 
 ## 🚀 Next Steps
