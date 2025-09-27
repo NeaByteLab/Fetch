@@ -290,6 +290,9 @@ export default class FetchClient {
       if (config.download) {
         return await this.handleDownloadResponse<T>(response, config)
       }
+      if (method === httpMethods.HEAD || method === httpMethods.OPTIONS) {
+        return { success: true, data: undefined as T }
+      }
       type ParseConfig = {
         responseType: 'auto' | 'json' | 'text' | 'buffer' | 'blob'
       } & Partial<{ onProgress: (percentage: number) => void }>

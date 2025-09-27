@@ -21,7 +21,7 @@ export async function parseResponse<T>(response: Response, url: string = 'unknow
     return (await response.text()) as T
   }
   const arrayBuffer: ArrayBuffer = await response.arrayBuffer()
-  return arrayBuffer as T
+  return Object.assign(arrayBuffer, { length: arrayBuffer.byteLength }) as T
 }
 
 /**
@@ -75,7 +75,8 @@ export async function parseByContentType<T>(
   if (isTextContentType(contentType)) {
     return (await response.text()) as T
   }
-  return (await response.arrayBuffer()) as T
+  const buffer: ArrayBuffer = await response.arrayBuffer()
+  return Object.assign(buffer, { length: buffer.byteLength }) as T
 }
 
 /**
@@ -114,8 +115,10 @@ export async function parseResponseByType<T>(
         }
       case 'text':
         return (await response.text()) as T
-      case 'buffer':
-        return (await response.arrayBuffer()) as T
+      case 'buffer': {
+        const buffer: ArrayBuffer = await response.arrayBuffer()
+        return Object.assign(buffer, { length: buffer.byteLength }) as T
+      }
       case 'blob':
         return (await response.blob()) as T
       default:

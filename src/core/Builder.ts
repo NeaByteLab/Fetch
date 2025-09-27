@@ -84,9 +84,17 @@ export function buildRequestInit(
   controller?: AbortController,
   onProgress?: (percentage: number) => void
 ): RequestInit {
+  const headers: Record<string, string> = { ...config.headers }
+  if (config.body !== undefined) {
+    if (config.body instanceof FormData) {
+      delete headers['Content-Type']
+    } else if (config.body instanceof URLSearchParams) {
+      headers['Content-Type'] = contentTypes.APPLICATION_URL_ENCODED
+    }
+  }
   const requestInit: RequestInit = {
     method,
-    headers: createHeaders(config.headers)
+    headers: createHeaders(headers)
   }
   const methodsWithBody: readonly string[] = [
     httpMethods.POST,
