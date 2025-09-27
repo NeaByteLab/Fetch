@@ -36,7 +36,6 @@ export class BalancerHandler {
   /**
    * Executes request with load balancing.
    * @description Routes request across multiple endpoints based on strategy.
-   * @param method - HTTP method
    * @param url - Request URL (relative to endpoints)
    * @param config - Balancer configuration
    * @param executeRequest - Function to execute individual requests
@@ -44,22 +43,20 @@ export class BalancerHandler {
    * @throws {FetchError} On configuration error or all endpoints failing
    */
   static async executeWithBalancer<T>(
-    method: string,
     url: string,
     config: BalancerConfig,
     executeRequest: BalancerExecutor<T>
   ): Promise<FetchResponse<T> | FetchResponse<T[]>> {
     this.validateBalancerConfig(config)
     if (config.strategy === 'fastest') {
-      return this.executeFastestStrategy(method, url, config, executeRequest)
+      return this.executeFastestStrategy(url, config, executeRequest)
     }
-    return this.executeParallelStrategy(method, url, config, executeRequest)
+    return this.executeParallelStrategy(url, config, executeRequest)
   }
 
   /**
    * Executes fastest strategy - sequential requests, return first successful.
    * @description Tries endpoints sequentially until one succeeds.
-   * @param method - HTTP method
    * @param url - Request URL
    * @param config - Balancer configuration
    * @param executeRequest - Function to execute individual requests
@@ -67,7 +64,6 @@ export class BalancerHandler {
    * @throws {FetchError} If all endpoints fail
    */
   private static async executeFastestStrategy<T>(
-    _method: string,
     url: string,
     config: BalancerConfig,
     executeRequest: BalancerExecutor<T>
@@ -97,7 +93,6 @@ export class BalancerHandler {
   /**
    * Executes parallel strategy - all requests simultaneously, return all responses.
    * @description Sends requests to all endpoints in parallel and returns all responses.
-   * @param method - HTTP method
    * @param url - Request URL
    * @param config - Balancer configuration
    * @param executeRequest - Function to execute individual requests
@@ -105,7 +100,6 @@ export class BalancerHandler {
    * @throws {FetchError} If all endpoints fail
    */
   private static async executeParallelStrategy<T>(
-    _method: string,
     url: string,
     config: BalancerConfig,
     executeRequest: BalancerExecutor<T>

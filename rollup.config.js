@@ -31,6 +31,17 @@ const plugins = [
     declarationMap: false,
     sourceMap: false,
     exclude: ['**/*.test.ts', '**/*.spec.ts', '**/tests/**', '**/test/**']
+  }),
+  terser({
+    compress: {
+      drop_console: true,
+      drop_debugger: true,
+      pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn', 'console.error']
+    },
+    mangle: false,
+    format: {
+      comments: false
+    }
   })
 ]
 /**
@@ -43,7 +54,7 @@ const minifyPlugins = [
     compress: {
       drop_console: true,
       drop_debugger: true,
-      pure_funcs: ['console.log', 'console.info', 'console.debug'],
+      pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn', 'console.error'],
       passes: 2,
       unsafe: true,
       unsafe_comps: true,

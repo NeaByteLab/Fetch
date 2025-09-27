@@ -75,7 +75,7 @@ export class ForwarderHandler {
         this.logForwarderResults(results)
       })
       .catch((error: unknown) => {
-        console.error('Forwarder error logging failed:', error)
+        console.error('[x] Forwarder error logging failed:', error)
       })
     return Promise.resolve()
   }
@@ -149,12 +149,12 @@ export class ForwarderHandler {
     ).length
     const failed: number = results.length - successful
     if (failed > 0) {
-      console.warn(`Forwarder: ${successful} successful, ${failed} failed`)
+      console.warn(`[x] Forwarder: ${successful} successful, ${failed} failed`)
       results.forEach((result: PromiseSettledResult<ForwarderResult>) => {
         if (result.status === 'fulfilled' && !result.value.success) {
-          console.warn(`Forwarder failed for ${result.value.endpoint}:`, result.value.error)
+          console.warn(`[x] Forwarder failed for ${result.value.endpoint}:`, result.value.error)
         } else if (result.status === 'rejected') {
-          console.warn('Forwarder promise rejected:', result.reason)
+          console.warn('[x] Forwarder promise rejected:', result.reason)
         }
       })
     }

@@ -217,7 +217,6 @@ export default class FetchClient {
       if (config.forwarder && config.forwarder.length > 0) {
         await this.forwardResponse<T>(
           response as T,
-          method,
           config as typeof config & {
             forwarder: ForwarderEndpoint<T>[]
           }
@@ -240,7 +239,6 @@ export default class FetchClient {
     if (config.forwarder && config.forwarder.length > 0) {
       await this.forwardResponse<T>(
         response as T,
-        method,
         config as typeof config & {
           forwarder: ForwarderEndpoint<T>[]
         }
@@ -374,7 +372,6 @@ export default class FetchClient {
     const { balancer, ...baseConfig }: typeof config = config
     const response: FetchResponse<T> | FetchResponse<T[]> =
       await BalancerHandler.executeWithBalancer(
-        method,
         url,
         balancer,
         async (
@@ -398,7 +395,6 @@ export default class FetchClient {
           }
         }
       )
-
     return response
   }
 
@@ -406,12 +402,10 @@ export default class FetchClient {
    * Forwards response to multiple endpoints.
    * @description Sends response data to all configured forwarder endpoints.
    * @param responseData - Response data to forward
-   * @param method - HTTP method for forwarding
    * @param config - Request configuration with forwarder
    */
   private static async forwardResponse<T>(
     responseData: T,
-    _method: string,
     config: typeof FetchClient.defaultConfig & {
       signal?: AbortSignal
       body?: FetchRequestBody
