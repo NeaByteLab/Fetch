@@ -1,6 +1,6 @@
 import type { FetchRequestBody } from '@interfaces/index'
 import { contentTypes, httpMethods, schemes } from '@constants/index'
-import { createHeaders } from '@utils/index'
+import { createHeaders, createRateLimiter } from '@utils/index'
 
 /**
  * Builds an absolute URL from a base and a relative path.
@@ -26,18 +26,20 @@ export function buildUrl(url: string, baseURL: string): string {
  * @description Handles different body types and progress tracking.
  * @param body - Request body to process
  * @param headers - Request headers
+ * @param maxRate - Optional maximum rate in bytes per second
  * @param onProgress - Optional progress callback
  * @returns Object with processed body and duplex flag
  */
 function processRequestBody(
   body: FetchRequestBody,
   headers: Record<string, string>,
+  maxRate?: number,
   onProgress?: (percentage: number) => void
 ): { body: BodyInit; needsDuplex: boolean } {
   if (isValidBodyInit(body)) {
     if (onProgress) {
       return {
-        body: createBodyWithProgress(body as BodyInit, onProgress),
+        body: createBodyWithProgress(body as BodyInit, maxRate, onProgress),
         needsDuplex: true
       }
     }
@@ -48,7 +50,7 @@ function processRequestBody(
     const serializedBody: string = serializeObjectBody(body as Record<string, unknown>, headers)
     if (onProgress) {
       return {
-        body: createBodyWithProgress(serializedBody, onProgress),
+        body: createBodyWithProgress(serializedBody, maxRate, onProgress),
         needsDuplex: true
       }
     }
@@ -58,7 +60,7 @@ function processRequestBody(
   headers['Content-Type'] ??= contentTypes.TEXT_PLAIN
   if (onProgress) {
     return {
-      body: createBodyWithProgress(stringBody, onProgress),
+      body: createBodyWithProgress(stringBody, maxRate, onProgress),
       needsDuplex: true
     }
   }
@@ -80,6 +82,7 @@ export function buildRequestInit(
     headers: Record<string, string>
     signal?: AbortSignal
     body?: FetchRequestBody
+    maxRate?: number
   },
   controller?: AbortController,
   onProgress?: (percentage: number) => void
@@ -105,6 +108,7 @@ export function buildRequestInit(
     const bodyResult: { body: BodyInit; needsDuplex: boolean } = processRequestBody(
       config.body,
       config.headers,
+      config.maxRate,
       onProgress
     )
     requestInit.body = bodyResult.body
@@ -148,8 +152,8 @@ export function serializeObjectBody(
   body: Record<string, unknown>,
   headers: Record<string, string>
 ): string {
-  const contentType: string | undefined = headers['Content-Type']
   let result: string
+  const contentType: string | undefined = headers['Content-Type']
   if (contentType === undefined || contentType === contentTypes.APPLICATION_JSON) {
     result = JSON.stringify(body)
   } else if (contentType.includes(contentTypes.APPLICATION_URL_ENCODED)) {
@@ -245,15 +249,18 @@ function convertBodyToBytes(body: BodyInit): Uint8Array {
  * Creates a body with upload progress tracking.
  * @description Wraps a body in a ReadableStream that tracks upload progress.
  * @param body - The body to wrap
+ * @param maxRate - Maximum upload rate in bytes per second
  * @param onProgress - Progress callback function
  * @returns ReadableStream with progress tracking
  */
 export function createBodyWithProgress(
   body: BodyInit,
-  onProgress: (percentage: number) => void
+  maxRate?: number,
+  onProgress?: (percentage: number) => void
 ): ReadableStream<Uint8Array> {
-  const totalBytes: number = calculateBodySize(body)
   let uploadedBytes: number = 0
+  const totalBytes: number = calculateBodySize(body)
+  const rateLimiter: ReturnType<typeof createRateLimiter> = createRateLimiter()
   if (body instanceof Blob) {
     return new ReadableStream<Uint8Array>({
       async start(controller: ReadableStreamDefaultController<Uint8Array>): Promise<void> {
@@ -264,10 +271,13 @@ export function createBodyWithProgress(
           const chunkSize: number = Math.max(1024, Math.floor(actualTotalBytes / 100))
           for (let i: number = 0; i < bytes.length; i += chunkSize) {
             const chunk: Uint8Array = bytes.slice(i, i + chunkSize)
+            if (maxRate !== undefined && maxRate > 0) {
+              await rateLimiter.throttle(chunk.length, maxRate)
+            }
             controller.enqueue(chunk)
             uploadedBytes += chunk.length
             const percentage: number = Math.round((uploadedBytes / actualTotalBytes) * 100)
-            onProgress(Math.min(percentage, 100))
+            onProgress?.(Math.min(percentage, 100))
           }
           controller.close()
         } catch (error) {
@@ -278,14 +288,17 @@ export function createBodyWithProgress(
   }
   const bodyBytes: Uint8Array = convertBodyToBytes(body)
   return new ReadableStream<Uint8Array>({
-    start(controller: ReadableStreamDefaultController<Uint8Array>): void {
+    async start(controller: ReadableStreamDefaultController<Uint8Array>): Promise<void> {
       const chunkSize: number = Math.max(1024, Math.floor(totalBytes / 100))
       for (let i: number = 0; i < bodyBytes.length; i += chunkSize) {
         const chunk: Uint8Array = bodyBytes.slice(i, i + chunkSize)
+        if (maxRate !== undefined && maxRate > 0) {
+          await rateLimiter.throttle(chunk.length, maxRate)
+        }
         controller.enqueue(chunk)
         uploadedBytes += chunk.length
         const percentage: number = Math.round((uploadedBytes / totalBytes) * 100)
-        onProgress(Math.min(percentage, 100))
+        onProgress?.(Math.min(percentage, 100))
       }
       controller.close()
     }

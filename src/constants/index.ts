@@ -62,36 +62,36 @@ export const httpMethods: {
  */
 export const errorMessages: {
   readonly ABORTED: string
-  readonly CONTENT_TYPE_NULL: string
-  readonly RESPONSE_BODY_NULL: string
-  readonly RESPONSE_TOO_LARGE: string
-  readonly FILENAME_REQUIRED: string
-  readonly FILENAME_UNDEFINED: string
-  readonly PROGRESS_CALLBACK_UNDEFINED: string
-  readonly RETRIES_NON_NEGATIVE: string
-  readonly STREAM_PARSE_PREFIX: string
-  readonly URL_INVALID: string
-  readonly TIMEOUT_NON_NEGATIVE: string
-  readonly UNKNOWN_ERROR: string
   readonly BALANCER_ENDPOINTS_REQUIRED: string
   readonly BALANCER_STRATEGY_INVALID: string
+  readonly CONTENT_TYPE_NULL: string
+  readonly FILENAME_REQUIRED: string
+  readonly FILENAME_UNDEFINED: string
   readonly FORWARDER_ENDPOINTS_REQUIRED: string
+  readonly PROGRESS_CALLBACK_UNDEFINED: string
+  readonly RESPONSE_BODY_NULL: string
+  readonly RESPONSE_TOO_LARGE: string
+  readonly RETRIES_NON_NEGATIVE: string
+  readonly STREAM_PARSE_PREFIX: string
+  readonly TIMEOUT_NON_NEGATIVE: string
+  readonly UNKNOWN_ERROR: string
+  readonly URL_INVALID: string
 } = {
-  ABORTED: 'Request aborted',
-  CONTENT_TYPE_NULL: 'Content type is null',
-  RESPONSE_BODY_NULL: 'Response body is null',
-  RESPONSE_TOO_LARGE: 'Response too large',
-  FILENAME_REQUIRED: 'Filename is required when download is enabled',
-  FILENAME_UNDEFINED: 'Filename is undefined',
-  PROGRESS_CALLBACK_UNDEFINED: 'Progress callback is undefined',
-  RETRIES_NON_NEGATIVE: 'Retries must be a non-negative number',
-  STREAM_PARSE_PREFIX: 'Failed to parse streaming response: ',
-  URL_INVALID: 'URL must be a non-empty string',
-  TIMEOUT_NON_NEGATIVE: 'Timeout must be a non-negative number',
-  UNKNOWN_ERROR: 'Unknown error',
+  ABORTED: 'Request timeout - operation exceeded the specified timeout duration',
   BALANCER_ENDPOINTS_REQUIRED: 'Balancer endpoints are required and must be a non-empty array',
   BALANCER_STRATEGY_INVALID: 'Balancer strategy must be either "fastest" or "parallel"',
-  FORWARDER_ENDPOINTS_REQUIRED: 'Forwarder endpoints are required and must be a non-empty array'
+  CONTENT_TYPE_NULL: 'Content type is null',
+  FILENAME_REQUIRED: 'Filename is required when download is enabled',
+  FILENAME_UNDEFINED: 'Filename is undefined',
+  FORWARDER_ENDPOINTS_REQUIRED: 'Forwarder endpoints are required and must be a non-empty array',
+  PROGRESS_CALLBACK_UNDEFINED: 'Progress callback is undefined',
+  RESPONSE_BODY_NULL: 'Response body is null',
+  RESPONSE_TOO_LARGE: 'Response too large',
+  RETRIES_NON_NEGATIVE: 'Retries must be a non-negative number',
+  STREAM_PARSE_PREFIX: 'Failed to parse streaming response: ',
+  TIMEOUT_NON_NEGATIVE: 'Timeout must be a non-negative number',
+  UNKNOWN_ERROR: 'Unknown error',
+  URL_INVALID: 'URL must be a non-empty string'
 } as const
 
 /**

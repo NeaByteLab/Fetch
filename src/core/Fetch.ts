@@ -215,6 +215,7 @@ export default class FetchClient {
         }
       )
       if (config.forwarder && config.forwarder.length > 0) {
+        ForwarderHandler.validateForwarderConfig({ forwarders: config.forwarder })
         await this.forwardResponse<T>(
           response as T,
           config as typeof config & {
@@ -237,6 +238,7 @@ export default class FetchClient {
       honorRetryAfterIfPresent
     )
     if (config.forwarder && config.forwarder.length > 0) {
+      ForwarderHandler.validateForwarderConfig({ forwarders: config.forwarder })
       await this.forwardResponse<T>(
         response as T,
         config as typeof config & {
@@ -322,12 +324,20 @@ export default class FetchClient {
     response: Response,
     config: typeof FetchClient.defaultConfig & {
       filename?: string
+      maxRate?: number
       onProgress?: (percentage: number) => void
     }
   ): Promise<{ success: true; data: T }> {
-    const downloadConfig: { filename?: string; onProgress?: (percentage: number) => void } = {}
+    const downloadConfig: {
+      filename?: string
+      maxRate?: number
+      onProgress?: (percentage: number) => void
+    } = {}
     if (config.filename !== undefined) {
       downloadConfig.filename = config.filename
+    }
+    if (config.maxRate !== undefined) {
+      downloadConfig.maxRate = config.maxRate
     }
     if (config.onProgress !== undefined) {
       downloadConfig.onProgress = config.onProgress

@@ -10,11 +10,12 @@ HTTP client with timeout, retries, streaming, downloads, and error handling for 
 ## ✨ Features
 
 - 🌐 **Universal Support** - Browser and Node.js
-- ❌ **Request Cancellation** - AbortSignal support
+- ❌ **Request Cancellation** - `AbortSignal` support
 - ⏱️ **Timeout Control** - Configurable timeouts (default: 30s)
 - 🔄 **Retry Logic** - Exponential backoff with Retry-After header support
 - 📡 **NDJSON Streaming** - Real-time JSON processing
 - 📊 **Progress Tracking** - Upload and download progress
+- 🚦 **Rate Limiting** - Control transfer speeds with `maxRate` option
 - 📦 **Request Bodies** - JSON, FormData, URLSearchParams, binary data
 - 📥 **File Downloads** - Cross-platform file downloads
 - ⚖️ **Request Balancer** - Load balance requests across multiple endpoints
@@ -77,6 +78,20 @@ try {
     console.log('HTTP Error:', error.status, error.message)
   }
 }
+
+// Rate limiting for downloads (100KB/s)
+const file = await fetch.get('https://example.com/large-file.zip', {
+  download: true,
+  filename: 'large-file.zip',
+  maxRate: 100 * 1024, // 100KB/s
+  onProgress: (percentage) => console.log(`Download: ${percentage}%`)
+})
+
+// Rate limiting for uploads (50KB/s)
+const result = await fetch.post('https://api.example.com/upload', fileData, {
+  maxRate: 50 * 1024, // 50KB/s
+  onProgress: (percentage) => console.log(`Upload: ${percentage}%`)
+})
 ```
 
 For detailed examples and usage patterns, see the [documentation](./docs/README.md).

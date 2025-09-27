@@ -133,6 +133,12 @@ export * from '@utils/Parser'
 export * from '@utils/RetryAfter'
 
 /**
+ * Re-exports rate limiting utilities.
+ * @description Provides rate limiting utilities for transfer speed control.
+ */
+export * from '@utils/RateLimiter'
+
+/**
  * Re-exports URL validation utilities.
  * @description Provides URL validation utilities from the validator module.
  */

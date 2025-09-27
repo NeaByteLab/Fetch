@@ -68,6 +68,91 @@ for (const file of files) {
 }
 ```
 
+## 🚦 Rate Limiting with Progress
+
+### Download with Rate Limiting
+
+```typescript
+const response = await fetch.get('https://httpbin.org/bytes/10240', {
+  download: true,
+  filename: 'large-file.bin',
+  maxRate: 100 * 1024, // 100KB/s
+  onProgress: (percentage) => {
+    console.log(`Download progress: ${percentage}% (rate limited)`)
+  }
+})
+```
+
+### Upload with Rate Limiting
+
+```typescript
+const formData = new FormData()
+formData.append('file', fileInput.files[0])
+
+const response = await fetch.post('https://httpbin.org/post', formData, {
+  maxRate: 50 * 1024, // 50KB/s
+  onProgress: (percentage) => {
+    console.log(`Upload progress: ${percentage}% (rate limited)`)
+  }
+})
+```
+
+### Rate Limiting with Progress Bar
+
+```typescript
+function updateProgressBar(percentage: number, rate: string) {
+  const bar = '█'.repeat(Math.floor(percentage / 2))
+  const space = ' '.repeat(50 - Math.floor(percentage / 2))
+  process.stdout.write(`\r[${bar}${space}] ${percentage}% (${rate})`)
+}
+
+const response = await fetch.get('https://httpbin.org/bytes/10240', {
+  download: true,
+  filename: 'file.bin',
+  maxRate: 200 * 1024, // 200KB/s
+  onProgress: (percentage) => {
+    updateProgressBar(percentage, '200KB/s')
+  }
+})
+```
+
+### Dynamic Rate Limiting
+
+```typescript
+class AdaptiveRateLimiter {
+  private baseRate: number
+  private currentRate: number
+
+  constructor(baseRate: number) {
+    this.baseRate = baseRate
+    this.currentRate = baseRate
+  }
+
+  getRate(): number {
+    return this.currentRate
+  }
+
+  adjustRate(success: boolean) {
+    if (success) {
+      this.currentRate = Math.min(this.currentRate * 1.1, this.baseRate * 2)
+    } else {
+      this.currentRate = Math.max(this.currentRate * 0.9, this.baseRate * 0.5)
+    }
+  }
+}
+
+const rateLimiter = new AdaptiveRateLimiter(100 * 1024) // 100KB/s base
+
+const response = await fetch.get('https://httpbin.org/bytes/10240', {
+  download: true,
+  filename: 'file.bin',
+  maxRate: rateLimiter.getRate(),
+  onProgress: (percentage) => {
+    console.log(`Progress: ${percentage}% at ${Math.round(rateLimiter.getRate() / 1024)}KB/s`)
+  }
+})
+```
+
 ## 📤 Upload Progress
 
 ### Basic Upload Progress

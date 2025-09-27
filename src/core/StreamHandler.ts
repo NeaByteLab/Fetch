@@ -13,6 +13,7 @@ export class StreamHandler {
    * @param response - Source response
    * @param url - Request URL for error context
    * @returns Async iterable yielding typed chunks
+   * @throws {FetchError} When response body is null or stream parsing fails
    */
   static createStreamIterator<T>(response: Response, url: string): AsyncIterable<T> {
     const bodyStream: ReadableStream<Uint8Array> | null = response.body
@@ -74,6 +75,7 @@ export class StreamHandler {
    * Iterates text chunks from a ReadableStream.
    * @description Yields decoded text chunks from a ReadableStream using TextDecoder.
    * @param reader - Stream reader
+   * @returns Async generator yielding text chunks
    */
   static async *iterateText<T>(
     reader: ReadableStreamDefaultReader<Uint8Array>
@@ -98,13 +100,15 @@ export class StreamHandler {
    * @description Parses NDJSON stream line by line, yielding complete JSON objects.
    * @param reader - Stream reader
    * @param url - Request URL for error context
+   * @returns Async generator yielding parsed JSON objects
+   * @throws {FetchError} When JSON parsing fails
    */
   static async *iterateNdjson<T>(
     reader: ReadableStreamDefaultReader<Uint8Array>,
     url: string
   ): AsyncGenerator<T, void, unknown> {
-    const decoder: TextDecoder = new TextDecoder()
     let buffer: string = ''
+    const decoder: TextDecoder = new TextDecoder()
     while (true) {
       const chunk: string | null = await StreamHandler.readDecodedChunk(reader, decoder)
       if (chunk === null) {
@@ -131,6 +135,8 @@ export class StreamHandler {
    * @param buffer - Accumulated text buffer
    * @param setBuffer - Callback to update buffer after consumption
    * @param url - Request URL for error context
+   * @returns Generator yielding parsed JSON objects
+   * @throws {FetchError} When JSON parsing fails
    */
   static *yieldCompleteJsonLines<T>(
     buffer: string,
@@ -154,7 +160,8 @@ export class StreamHandler {
    * @description Parses a JSON string with error handling, yielding the parsed object.
    * @param line - JSON line string
    * @param url - Request URL for error context
-   * @returns Generator yielding the parsed value
+   * @returns Generator yielding the parsed JSON object
+   * @throws {FetchError} When JSON parsing fails
    */
   static *safeParseJsonLine<T>(line: string, url: string): Generator<T, void, unknown> {
     try {
@@ -173,6 +180,7 @@ export class StreamHandler {
    * Iterates binary chunks from a ReadableStream.
    * @description Yields raw binary chunks from a ReadableStream as Uint8Array.
    * @param reader - Stream reader
+   * @returns Async generator yielding binary chunks
    */
   static async *iterateBinary<T>(
     reader: ReadableStreamDefaultReader<Uint8Array>

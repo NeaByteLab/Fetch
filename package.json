@@ -1,6 +1,6 @@
 {
   "name": "@neabyte/fetch",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "HTTP client with timeout, retries, streaming, downloads, and error handling for browser and Node.js.",
   "type": "module",
   "main": "dist/index.cjs.js",

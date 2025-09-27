@@ -28,7 +28,12 @@ export class BalancerHandler {
     }
     for (const endpoint of config.endpoints) {
       if (!isValidURL(endpoint)) {
-        throw new FetchError(`Invalid endpoint URL: ${endpoint}`, undefined, undefined, endpoint)
+        throw new FetchError(
+          `Invalid balancer endpoint URL: ${endpoint}`,
+          undefined,
+          undefined,
+          endpoint
+        )
       }
     }
   }
@@ -83,7 +88,7 @@ export class BalancerHandler {
       throw lastError.error
     }
     throw new FetchError(
-      `All ${config.endpoints.length} endpoints failed`,
+      `All ${config.endpoints.length} balancer endpoints failed`,
       undefined,
       errors,
       config.endpoints[0]
@@ -139,7 +144,7 @@ export class BalancerHandler {
           error: result.error
         }))
       throw new FetchError(
-        `All ${config.endpoints.length} endpoints failed`,
+        `All ${config.endpoints.length} balancer endpoints failed`,
         undefined,
         errors,
         config.endpoints[0]

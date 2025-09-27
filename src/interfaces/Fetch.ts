@@ -38,6 +38,8 @@ export interface FetchOptions {
   forwarder?: ForwarderEndpoint[]
   /** Additional request headers */
   headers?: Record<string, string>
+  /** Maximum transfer rate in bytes per second (for downloads/uploads) */
+  maxRate?: number
   /** Progress callback for downloads */
   onProgress?: (percentage: number) => void
   /** Number of retry attempts */
