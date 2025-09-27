@@ -11,8 +11,9 @@ import fetch from '@neabyte/fetch'
 // CommonJS
 const fetch = require('@neabyte/fetch').default
 
-// TypeScript
-import fetch, { FetchError } from '@neabyte/fetch'
+// TypeScript with types
+import fetch from '@neabyte/fetch'
+import type { FetchError, FetchOptions, FetchResponse } from '@neabyte/fetch'
 ```
 
 ## 🔗 HTTP Methods
@@ -229,7 +230,7 @@ try {
 ### FetchError Details
 
 ```typescript
-import { FetchError } from '@neabyte/fetch'
+import type { FetchError } from '@neabyte/fetch'
 
 try {
   const data = await fetch.get('https://api.example.com/data')

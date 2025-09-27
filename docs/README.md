@@ -23,6 +23,25 @@ For installation and basic setup, see the main [README](../README.md).
 - `fetch.head(url, options?)` - HEAD request
 - `fetch.options(url, options?)` - OPTIONS request
 
+### Import & Usage
+
+```typescript
+// Main class
+import fetch from '@neabyte/fetch'
+
+// TypeScript types
+import type {
+  FetchError,
+  FetchOptions,
+  FetchResponse,
+  FetchRequestBody,
+  TimeoutController
+} from '@neabyte/fetch'
+
+// Utility function
+import { createHeaders } from '@neabyte/fetch'
+```
+
 ### Configuration Options
 
 ```typescript
