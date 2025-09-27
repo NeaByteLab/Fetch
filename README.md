@@ -101,9 +101,13 @@ For detailed examples and usage patterns, see the [documentation](./docs/README.
 ## 🗺️ Roadmap
 
 ### 🔮 **Planned Features**
-- [ ] **HTTP Proxy Support** - Connect through HTTP proxies
-- [ ] **SOCKS Proxy Support** - Connect through SOCKS4/SOCKS5 proxies
-- [ ] **Proxy Authentication** - Username/password authentication for proxies
+- [ ] **Authentication Helpers** - Basic, Bearer, and API key auth
+- [ ] **Cookie Management** - Cookie handling
+- [ ] **HTTP Proxy Support** - HTTP proxy connections
+- [ ] **Proxy Authentication** - Username/password for proxies
+- [ ] **Request/Response Interceptors** - Request and response modification
+- [ ] **Request/Response Transformers** - Data transformation
+- [ ] **SOCKS Proxy Support** - SOCKS4/SOCKS5 proxy connections
 
 ### 📋 **Future Considerations**
 - [ ] Additional proxy types and configurations
