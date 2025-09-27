@@ -51,23 +51,6 @@ const userData = await fetch.get('/api/profile', {
 })
 ```
 
-### Service Redundancy
-
-```typescript
-// Multiple instances of the same service
-const healthCheck = await fetch.get('/health', {
-  balancer: {
-    endpoints: [
-      'https://service-1.example.com',
-      'https://service-2.example.com',
-      'https://service-3.example.com'
-    ],
-    strategy: 'fastest'
-  },
-  timeout: 5000,
-  retries: 1
-})
-```
 
 ### TypeScript Type Safety
 
@@ -150,23 +133,6 @@ const mergedProfile = userProfiles.reduce((acc, response) => ({
 }), {})
 ```
 
-### TypeScript with Parallel Strategy
-
-```typescript
-interface AnalyticsData {
-  views: number
-  clicks: number
-  conversions: number
-}
-
-// TypeScript infers array return type
-const analytics: FetchResponse<AnalyticsData[]> = await fetch.get('/api/analytics', {
-  balancer: {
-    endpoints: ['https://analytics1.com', 'https://analytics2.com'],
-    strategy: 'parallel'
-  }
-})
-```
 
 ## 🔧 Advanced Configuration
 
@@ -355,98 +321,6 @@ async function monitorAllEndpoints() {
 }
 ```
 
-## ❌ Error Handling
-
-### Basic Error Handling
-
-```typescript
-try {
-  const response = await fetch.get('/api/data', {
-    balancer: {
-      endpoints: ['https://api1.com', 'https://api2.com'],
-      strategy: 'fastest'
-    }
-  })
-  console.log('Success:', response.data)
-} catch (error) {
-  if (error instanceof FetchError) {
-    console.log('All endpoints failed:', error.message)
-  }
-}
-```
-
-### Graceful Degradation
-
-```typescript
-async function fetchWithFallback() {
-  try {
-    // Try with balancer first
-    return await fetch.get('/api/data', {
-      balancer: {
-        endpoints: ['https://api1.com', 'https://api2.com'],
-        strategy: 'fastest'
-      }
-    })
-  } catch (error) {
-    console.warn('Balancer failed, trying single endpoint')
-    // Fallback to single endpoint
-    return await fetch.get('/api/data', {
-      baseURL: 'https://backup-api.com'
-    })
-  }
-}
-```
-
-### Detailed Error Analysis
-
-```typescript
-try {
-  const response = await fetch.get('/api/data', {
-    balancer: {
-      endpoints: ['https://api1.com', 'https://api2.com', 'https://api3.com'],
-      strategy: 'parallel'
-    }
-  })
-} catch (error) {
-  if (error instanceof FetchError) {
-    console.log('Error details:')
-    console.log('- Message:', error.message)
-    console.log('- URL:', error.url)
-    console.log('- Status:', error.status)
-    console.log('- Data:', error.data)
-  }
-}
-```
-
-## 🔄 Retry Integration
-
-### Custom Retry Configuration
-
-```typescript
-// Different retry settings for different strategies
-const response = await fetch.get('/api/data', {
-  balancer: {
-    endpoints: ['https://api1.com', 'https://api2.com'],
-    strategy: 'fastest'
-  },
-  retries: 3,
-  timeout: 10000
-})
-```
-
-### Retry with Exponential Backoff
-
-```typescript
-// The balancer automatically uses the retry mechanism
-const response = await fetch.get('/api/data', {
-  balancer: {
-    endpoints: ['https://api1.com', 'https://api2.com'],
-    strategy: 'fastest'
-  },
-  retries: 5,
-  timeout: 15000
-})
-```
 
 ## 🎯 Best Practices
 
@@ -500,26 +374,6 @@ const criticalData = await fetch.get('/api/critical', {
 const allData = await fetch.get('/api/analytics', {
   balancer: {
     endpoints: ['https://api1.com', 'https://api2.com'],
-    strategy: 'parallel'
-  }
-})
-```
-
-### Performance Considerations
-
-```typescript
-// Fastest strategy - O(n) latency, low resource usage
-const fastResponse = await fetch.get('/api/data', {
-  balancer: {
-    endpoints: ['https://api1.com', 'https://api2.com', 'https://api3.com'],
-    strategy: 'fastest'
-  }
-})
-
-// Parallel strategy - O(1) latency, high resource usage
-const parallelResponse = await fetch.get('/api/data', {
-  balancer: {
-    endpoints: ['https://api1.com', 'https://api2.com', 'https://api3.com'],
     strategy: 'parallel'
   }
 })

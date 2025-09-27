@@ -61,24 +61,6 @@ const response = await fetch.post('/api/orders', orderData, {
 })
 ```
 
-### Custom Headers
-
-```typescript
-// Forward with custom headers
-const response = await fetch.get('/api/data', {
-  forwarder: [
-    {
-      method: 'POST',
-      url: 'https://monitoring.example.com/api/metrics',
-      headers: {
-        'Authorization': 'Bearer monitoring-token',
-        'X-Request-ID': Math.random().toString(36).substr(2, 9),
-        'X-Source-Service': 'data-api'
-      }
-    }
-  ]
-})
-```
 
 ## 🚀 Function-Based Body Examples
 
@@ -174,53 +156,6 @@ const response = await fetch.post('/api/orders', orderData, {
     }
   ]
 })
-```
-
-## 📞 Callback Strategy Examples
-
-### Completion Callback
-
-```typescript
-// Monitor forwarder success rates
-const response = await fetch.get('/api/data', {
-  forwarder: [
-    {
-      method: 'POST',
-      url: 'https://logs.example.com/api/audit'
-    },
-    {
-      method: 'POST',
-      url: 'https://analytics.example.com/api/events'
-    }
-  ]
-})
-// Forwarding happens automatically in the background
-// Results are logged automatically by the system
-```
-
-### Fire-and-Forget Forwarding
-
-```typescript
-// Fire-and-forget forwarding with automatic error handling
-const response = await fetch.get('/api/data', {
-  forwarder: [
-    {
-      method: 'POST',
-      url: 'https://critical-service.example.com/api/data',
-      retries: 3,  // More retries for critical services
-      timeout: 5000
-    },
-    {
-      method: 'POST',
-      url: 'https://optional-service.example.com/api/data',
-      retries: 1,  // Fewer retries for optional services
-      timeout: 2000
-    }
-  ]
-})
-// All forwarding happens in background
-// Errors are automatically logged and handled
-// Main response returns immediately
 ```
 
 ## 🔧 Advanced Configuration
@@ -490,107 +425,6 @@ function generateSignature(event: string, data: any): string {
 }
 ```
 
-## ❌ Error Handling
-
-### Basic Error Handling
-
-```typescript
-try {
-  const response = await fetch.get('/api/data', {
-    forwarder: [
-      {
-        method: 'POST',
-        url: 'https://logs.example.com/api/audit'
-      }
-    ]
-  })
-  console.log('Success:', response.data)
-} catch (error) {
-  if (error instanceof FetchError) {
-    console.log('Main request failed:', error.message)
-  }
-}
-```
-
-### Forwarder Error Monitoring
-
-```typescript
-const response = await fetch.get('/api/data', {
-  forwarder: [
-    {
-      method: 'POST',
-      url: 'https://logs.example.com/api/audit'
-    },
-    {
-      method: 'POST',
-      url: 'https://analytics.example.com/api/events'
-    }
-  ]
-})
-// Forwarding happens automatically in background
-// Errors are automatically logged and handled
-```
-
-### Graceful Degradation
-
-```typescript
-// Continue even if forwarders fail
-const response = await fetch.get('/api/data', {
-  forwarder: [
-    {
-      method: 'POST',
-      url: 'https://critical-logs.example.com/api/audit'
-    },
-    {
-      method: 'POST',
-      url: 'https://optional-analytics.example.com/api/events'
-    }
-  ]
-})
-// Fire-and-forget forwarding with automatic error handling
-// Critical vs optional services handled via retry/timeout config
-```
-
-## 🔄 Retry Integration
-
-### Custom Retry per Forwarder
-
-```typescript
-// Different retry settings for different forwarders
-const response = await fetch.get('/api/data', {
-  forwarder: [
-    {
-      method: 'POST',
-      url: 'https://critical-service.example.com/api/data',
-      retries: 5,
-      timeout: 10000
-    },
-    {
-      method: 'POST',
-      url: 'https://optional-service.example.com/api/data',
-      retries: 1,
-      timeout: 3000
-    }
-  ]
-})
-```
-
-### Retry with Exponential Backoff
-
-```typescript
-// The forwarder automatically uses the retry mechanism
-const response = await fetch.get('/api/data', {
-  forwarder: [
-    {
-      method: 'POST',
-      url: 'https://service.example.com/api/data',
-      retries: 3,
-      timeout: 5000
-    }
-  ]
-})
-```
-
 ## 🎯 Best Practices
 
 ### Forwarder Design
@@ -648,22 +482,6 @@ const response = await fetch.get('/api/data', {
     }
   ]
 })
-```
-
-### Error Handling Strategy
-
-```typescript
-// Implement proper error handling
-const response = await fetch.get('/api/data', {
-  forwarder: [
-    {
-      method: 'POST',
-      url: 'https://service.example.com/api/data'
-    }
-  ]
-})
-// Fire-and-forget forwarding with automatic error handling
-// All errors are automatically logged and tracked
 ```
 
 ## 🚀 Next Steps
