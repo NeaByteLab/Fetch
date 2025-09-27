@@ -247,7 +247,7 @@ try {
 
 ## 🚀 Next Steps
 
-- [Advanced Usage](./advanced-usage.md) - Complex scenarios and best practices
-- [Error Handling](./error-handling.md) - Comprehensive error handling patterns
+- [Advanced Usage](./advanced-usage.md) - Configuration options and patterns
+- [Error Handling](./error-handling.md) - Error handling patterns
 - [Progress Tracking](./progress-tracking.md) - Upload and download progress
 - [Streaming](./streaming.md) - Real-time data streaming

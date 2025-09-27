@@ -34,7 +34,8 @@ interface FetchOptions {
   signal?: AbortSignal                   // Abort signal for cancellation
   stream?: boolean                       // Enable streaming response (default: false)
   download?: boolean                     // Enable file download (default: false)
-  filename?: string                       // Filename for download (required if download: true)
+  filename?: string                      // Filename for download (required if download: true)
+
   // Response parsing type (default: 'auto')
   responseType?: 'auto' | 'json' | 'text' | 'buffer' | 'blob'
   // Progress callback for uploads and downloads
@@ -48,11 +49,11 @@ interface FetchOptions {
 
 Detailed examples are organized by category:
 
-- [Basic Usage](./examples/basic-usage.md)
-- [Advanced Usage](./examples/advanced-usage.md)
-- [Streaming](./examples/streaming.md)
-- [Progress Tracking](./examples/progress-tracking.md)
-- [Error Handling](./examples/error-handling.md)
+- [Basic Usage](./examples/basic-usage.md) - HTTP methods and common usage patterns
+- [Advanced Usage](./examples/advanced-usage.md) - Configuration options and patterns
+- [Error Handling](./examples/error-handling.md) - Error handling patterns
+- [Progress Tracking](./examples/progress-tracking.md) - Upload and download progress
+- [Streaming](./examples/streaming.md) - Real-time data streaming
 
 ## 🔗 Links
 
