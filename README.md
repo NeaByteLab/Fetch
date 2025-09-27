@@ -1,11 +1,52 @@
-# @neabyte/fetch
-
-[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![npm version](https://img.shields.io/npm/v/@neabyte/fetch.svg?color=red)](https://www.npmjs.com/package/@neabyte/fetch)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/NeaByteLab/Fetch/blob/main/LICENSE)
-[![Bundle Size](https://badgen.net/bundlephobia/minzip/@neabyte/fetch)](https://bundlephobia.com/result?p=@neabyte/fetch)
-
-HTTP client with timeout, retries, streaming, downloads, and error handling for browser and Node.js.
+<div align="center">
+  <h1>@neabyte/fetch</h1>
+  <p>
+    HTTP client with timeout, retries, streaming, downloads, and error handling for browser and Node.js.
+  </p>
+  <p>
+    <a href="https://www.typescriptlang.org/">
+      <img src="https://img.shields.io/badge/TypeScript-007ACC?logo=typescript&logoColor=white" alt="TypeScript">
+    </a>
+    <a href="https://www.npmjs.com/package/@neabyte/fetch">
+      <img alt="npm version" src="https://img.shields.io/npm/v/@neabyte/fetch.svg?color=red">
+    </a>
+    <a href="https://github.com/NeaByteLab/Fetch/blob/main/LICENSE">
+      <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
+    </a>
+    <a href="https://bundlephobia.com/result?p=@neabyte/fetch">
+      <img src="https://badgen.net/bundlephobia/minzip/@neabyte/fetch" alt="Bundle Size">
+    </a>
+    <a href="https://nodejs.org/">
+      <img src="https://img.shields.io/badge/node-%3E%3D22.0.0-brightgreen" alt="Node.js">
+    </a>
+  </p>
+  <table style="margin: 0 auto;">
+    <tr>
+      <td>
+        <img src="https://raw.githubusercontent.com/alrra/browser-logos/main/src/chrome/chrome_48x48.png" alt="Chrome" width="48" height="48">
+      </td>
+      <td>
+        <img src="https://raw.githubusercontent.com/alrra/browser-logos/main/src/firefox/firefox_48x48.png" alt="Firefox" width="48" height="48">
+      </td>
+      <td>
+        <img src="https://raw.githubusercontent.com/alrra/browser-logos/main/src/safari/safari_48x48.png" alt="Safari" width="48" height="48">
+      </td>
+      <td>
+        <img src="https://raw.githubusercontent.com/alrra/browser-logos/main/src/opera/opera_48x48.png" alt="Opera" width="48" height="48">
+      </td>
+      <td>
+        <img src="https://raw.githubusercontent.com/alrra/browser-logos/main/src/edge/edge_48x48.png" alt="Edge" width="48" height="48">
+      </td>
+    </tr>
+    <tr>
+      <td>Latest ✔</td>
+      <td>Latest ✔</td>
+      <td>Latest ✔</td>
+      <td>Latest ✔</td>
+      <td>Latest ✔</td>
+    </tr>
+  </table>
+</div>
 
 ## ✨ Features
 

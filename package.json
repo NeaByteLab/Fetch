@@ -40,7 +40,8 @@
     "clean": "rm -rf dist && rm -rf .tsbuildinfo && rm -rf .rollup.cache",
     "prepublishOnly": "npm run clean && npm run build",
     "type-check": "tsc --noEmit",
-    "check-all": "npm run lint && npm run type-check"
+    "check-all": "npm run lint && npm run type-check",
+    "test:browser": "playwright test"
   },
   "keywords": [
     "fetch",
@@ -77,6 +78,7 @@
   "homepage": "https://github.com/NeaByteLab/Fetch#readme",
   "devDependencies": {
     "@eslint/js": "^9.36.0",
+    "@playwright/test": "^1.55.1",
     "@rollup/plugin-commonjs": "^28.0.6",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-terser": "^0.4.4",

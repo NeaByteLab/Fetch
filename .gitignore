@@ -3,7 +3,6 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-package-lock.json
 yarn.lock
 
 # Build outputs
@@ -129,3 +128,13 @@ temp/
 *.backup
 *.bak
 *.orig
+
+# Playwright
+playwright-report/
+test-results/
+
+# Playwright browser
+playwright/.local/
+playwright/screenshots/
+playwright/videos/
+playwright/artifacts/
