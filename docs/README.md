@@ -71,8 +71,15 @@ Detailed examples are organized by category:
 - [Basic Usage](./examples/basic-usage.md) - HTTP methods and common usage patterns
 - [Advanced Usage](./examples/advanced-usage.md) - Configuration options and patterns
 - [Error Handling](./examples/error-handling.md) - Error handling patterns
+- [Request Balancer](./examples/request-balancer.md) - Load balancing and failover examples
+- [Response Forwarder](./examples/response-forwarder.md) - Response forwarding and observability examples
 - [Progress Tracking](./examples/progress-tracking.md) - Upload and download progress
 - [Streaming](./examples/streaming.md) - Real-time data streaming
+
+## 🏗️ Architecture
+
+- [Request Balancer](./architecture/request-balancer.md) - Load balancing strategies and patterns
+- [Response Forwarder](./architecture/response-forwarder.md) - Response forwarding and observability
 
 ## 🔗 Links
 

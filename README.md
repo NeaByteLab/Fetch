@@ -17,6 +17,8 @@ HTTP client with timeout, retries, streaming, downloads, and error handling for 
 - 📊 **Progress Tracking** - Upload and download progress
 - 📦 **Request Bodies** - JSON, FormData, URLSearchParams, binary data
 - 📥 **File Downloads** - Cross-platform file downloads
+- ⚖️ **Request Balancer** - Load balance requests across multiple endpoints
+- 📨 **Response Forwarder** - Forward responses to multiple endpoints
 - 🛡️ **Error Handling** - Structured errors with full context
 
 ---
@@ -87,15 +89,11 @@ For detailed examples and usage patterns, see the [documentation](./docs/README.
 - [ ] **HTTP Proxy Support** - Connect through HTTP proxies
 - [ ] **SOCKS Proxy Support** - Connect through SOCKS4/SOCKS5 proxies
 - [ ] **Proxy Authentication** - Username/password authentication for proxies
-- [ ] **Request Balancer** - Load balance requests across multiple endpoints
-- [ ] **Response Forwarder** - Forward responses to multiple endpoints
 
 ### 📋 **Future Considerations**
 - [ ] Additional proxy types and configurations
 - [ ] Enhanced proxy error handling
 - [ ] Proxy connection pooling
-- [ ] Forwarder error handling and retry logic
-- [ ] Request/response transformation for forwarder
 
 ---
 

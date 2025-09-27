@@ -108,5 +108,7 @@ try {
 
 ## 🚀 Next Steps
 
+- [Request Balancer](./request-balancer.md) - Load balancing and failover examples
+- [Response Forwarder](./response-forwarder.md) - Response forwarding and observability examples
 - [Progress Tracking](./progress-tracking.md) - Upload and download progress
 - [Streaming](./streaming.md) - Real-time data streaming

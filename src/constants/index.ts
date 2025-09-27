@@ -73,6 +73,9 @@ export const errorMessages: {
   readonly URL_INVALID: string
   readonly TIMEOUT_NON_NEGATIVE: string
   readonly UNKNOWN_ERROR: string
+  readonly BALANCER_ENDPOINTS_REQUIRED: string
+  readonly BALANCER_STRATEGY_INVALID: string
+  readonly FORWARDER_ENDPOINTS_REQUIRED: string
 } = {
   ABORTED: 'Request aborted',
   CONTENT_TYPE_NULL: 'Content type is null',
@@ -85,7 +88,10 @@ export const errorMessages: {
   STREAM_PARSE_PREFIX: 'Failed to parse streaming response: ',
   URL_INVALID: 'URL must be a non-empty string',
   TIMEOUT_NON_NEGATIVE: 'Timeout must be a non-negative number',
-  UNKNOWN_ERROR: 'Unknown error'
+  UNKNOWN_ERROR: 'Unknown error',
+  BALANCER_ENDPOINTS_REQUIRED: 'Balancer endpoints are required and must be a non-empty array',
+  BALANCER_STRATEGY_INVALID: 'Balancer strategy must be either "fastest" or "parallel"',
+  FORWARDER_ENDPOINTS_REQUIRED: 'Forwarder endpoints are required and must be a non-empty array'
 } as const
 
 /**
@@ -128,4 +134,30 @@ export const misc: {
 export const retryDelays: { readonly BASE_DELAY_MS: number; readonly MAX_DELAY_MS: number } = {
   BASE_DELAY_MS: 1000,
   MAX_DELAY_MS: 10000
+} as const
+
+/**
+ * Load balancer strategy options.
+ * @description Available strategies for request load balancing.
+ */
+export const balancerStrategies: {
+  readonly FASTEST: 'fastest'
+  readonly PARALLEL: 'parallel'
+} = {
+  FASTEST: 'fastest',
+  PARALLEL: 'parallel'
+} as const
+
+/**
+ * Forwarder default configuration values.
+ * @description Default settings for response forwarding.
+ */
+export const forwarderDefaults: {
+  readonly RETRIES: number
+  readonly TIMEOUT_MS: number
+  readonly METHOD: string
+} = {
+  RETRIES: 3,
+  TIMEOUT_MS: 10000,
+  METHOD: 'POST'
 } as const

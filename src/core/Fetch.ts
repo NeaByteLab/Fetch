@@ -2,23 +2,26 @@ import {
   FetchError,
   type FetchOptions,
   type FetchRequestBody,
-  type FetchResponse
+  type FetchResponse,
+  type ForwarderConfig,
+  type ForwarderEndpoint
 } from '@interfaces/index'
 import { contentTypes, defaults, errorMessages, headers, httpMethods } from '@constants/index'
 import {
-  buildUrl,
+  BalancerHandler,
   buildRequestInit,
+  buildUrl,
+  ErrorHandler,
+  ForwarderHandler,
   handleDownload,
-  StreamHandler,
-  ErrorHandler
+  RetryHandler,
+  StreamHandler
 } from '@core/index'
 import {
-  createTimeoutController,
   cleanupController,
-  waitForRetry,
-  shouldRetry,
-  parseResponseWithProgress,
-  honorRetryAfterIfPresent
+  createTimeoutController,
+  honorRetryAfterIfPresent,
+  parseResponseWithProgress
 } from '@utils/index'
 
 /**
@@ -58,7 +61,7 @@ export default class FetchClient {
   static async get<T = unknown>(
     url: string,
     options: FetchOptions = {}
-  ): Promise<FetchResponse<T>> {
+  ): Promise<FetchResponse<T> | FetchResponse<T[]>> {
     return this.request<T>(httpMethods.GET, url, options)
   }
 
@@ -74,7 +77,7 @@ export default class FetchClient {
     url: string,
     body?: FetchRequestBody,
     options: FetchOptions = {}
-  ): Promise<FetchResponse<T>> {
+  ): Promise<FetchResponse<T> | FetchResponse<T[]>> {
     return this.request<T>(httpMethods.POST, url, this.createRequestOptions(options, body))
   }
 
@@ -90,7 +93,7 @@ export default class FetchClient {
     url: string,
     body?: FetchRequestBody,
     options: FetchOptions = {}
-  ): Promise<FetchResponse<T>> {
+  ): Promise<FetchResponse<T> | FetchResponse<T[]>> {
     return this.request<T>(httpMethods.PUT, url, this.createRequestOptions(options, body))
   }
 
@@ -106,7 +109,7 @@ export default class FetchClient {
     url: string,
     body?: FetchRequestBody,
     options: FetchOptions = {}
-  ): Promise<FetchResponse<T>> {
+  ): Promise<FetchResponse<T> | FetchResponse<T[]>> {
     return this.request<T>(httpMethods.PATCH, url, this.createRequestOptions(options, body))
   }
 
@@ -120,7 +123,7 @@ export default class FetchClient {
   static async delete<T = unknown>(
     url: string,
     options: FetchOptions = {}
-  ): Promise<FetchResponse<T>> {
+  ): Promise<FetchResponse<T> | FetchResponse<T[]>> {
     return this.request<T>(httpMethods.DELETE, url, options)
   }
 
@@ -134,7 +137,7 @@ export default class FetchClient {
   static async head<T = unknown>(
     url: string,
     options: FetchOptions = {}
-  ): Promise<FetchResponse<T>> {
+  ): Promise<FetchResponse<T> | FetchResponse<T[]>> {
     return this.request<T>(httpMethods.HEAD, url, options)
   }
 
@@ -148,7 +151,7 @@ export default class FetchClient {
   static async options<T = unknown>(
     url: string,
     options: FetchOptions = {}
-  ): Promise<FetchResponse<T>> {
+  ): Promise<FetchResponse<T> | FetchResponse<T[]>> {
     return this.request<T>(httpMethods.OPTIONS, url, options)
   }
 
@@ -180,13 +183,15 @@ export default class FetchClient {
     method: string,
     url: string,
     options: FetchOptions = {}
-  ): Promise<FetchResponse<T>> {
+  ): Promise<FetchResponse<T> | FetchResponse<T[]>> {
     if (typeof url !== 'string' || url.trim() === '') {
       throw new FetchError(errorMessages.URL_INVALID, undefined, undefined, url)
     }
     const config: typeof FetchClient.defaultConfig & {
       signal?: AbortSignal
       body?: FetchRequestBody
+      balancer?: { endpoints: string[]; strategy: 'fastest' | 'parallel' }
+      forwarder?: ForwarderEndpoint<T>[]
     } = {
       ...this.defaultConfig,
       ...options
@@ -200,34 +205,48 @@ export default class FetchClient {
     if (config.download && (config.filename === undefined || config.filename.trim() === '')) {
       throw new FetchError(errorMessages.FILENAME_REQUIRED, undefined, undefined, url)
     }
-    const fullUrl: string = buildUrl(url, config.baseURL)
-    let lastError: unknown = null
-    for (let attempt: number = 0; attempt <= config.retries; attempt++) {
-      const result: { success: true; data: T } | { success: false; error: unknown } =
-        await this.executeRequest<T>(method, fullUrl, config)
-      if (result.success) {
-        return result.data
-      }
-      lastError = result.error
-      if (shouldRetry(result.error, attempt, config.retries)) {
-        const honored: boolean = await honorRetryAfterIfPresent(result.error)
-        if (honored) {
-          continue
+    if (config.balancer) {
+      const response: FetchResponse<T> | FetchResponse<T[]> = await this.executeWithBalancer<T>(
+        method,
+        url,
+        config as typeof config & {
+          balancer: { endpoints: string[]; strategy: 'fastest' | 'parallel' }
+          forwarder?: ForwarderEndpoint<T>[]
         }
-        await waitForRetry(attempt)
-        continue
+      )
+      if (config.forwarder && config.forwarder.length > 0) {
+        await this.forwardResponse<T>(
+          response as T,
+          method,
+          config as typeof config & {
+            forwarder: ForwarderEndpoint<T>[]
+          }
+        )
       }
-      break
+      return response
     }
-    if (lastError instanceof FetchError) {
-      throw lastError
-    }
-    throw new FetchError(
-      lastError instanceof Error ? lastError.message : errorMessages.UNKNOWN_ERROR,
-      undefined,
-      lastError,
-      fullUrl
+    const fullUrl: string = buildUrl(url, config.baseURL)
+    const response: FetchResponse<T> = await RetryHandler.executeWithRetries<T>(
+      fullUrl,
+      {
+        retries: config.retries,
+        timeout: config.timeout,
+        download: config.download,
+        ...config.filename !== undefined ? { filename: config.filename } : {}
+      },
+      () => this.executeRequest<T>(method, fullUrl, config),
+      honorRetryAfterIfPresent
     )
+    if (config.forwarder && config.forwarder.length > 0) {
+      await this.forwardResponse<T>(
+        response as T,
+        method,
+        config as typeof config & {
+          forwarder: ForwarderEndpoint<T>[]
+        }
+      )
+    }
+    return response
   }
 
   /**
@@ -332,5 +351,85 @@ export default class FetchClient {
       ok: response.ok
     }
     return { success: true, data: downloadInfo as T }
+  }
+
+  /**
+   * Executes request with load balancing.
+   * @description Routes request across multiple endpoints using balancer configuration.
+   * @param method - HTTP method
+   * @param url - Request URL
+   * @param config - Request configuration with balancer
+   * @returns Load balanced response
+   */
+  private static async executeWithBalancer<T>(
+    method: string,
+    url: string,
+    config: typeof FetchClient.defaultConfig & {
+      signal?: AbortSignal
+      body?: FetchRequestBody
+      balancer: { endpoints: string[]; strategy: 'fastest' | 'parallel' }
+      forwarder?: ForwarderEndpoint<T>[]
+    }
+  ): Promise<FetchResponse<T> | FetchResponse<T[]>> {
+    const { balancer, ...baseConfig }: typeof config = config
+    const response: FetchResponse<T> | FetchResponse<T[]> =
+      await BalancerHandler.executeWithBalancer(
+        method,
+        url,
+        balancer,
+        async (
+          endpoint: string
+        ): Promise<{ success: true; data: T } | { success: false; error: unknown }> => {
+          try {
+            const response: FetchResponse<T> = await RetryHandler.executeWithRetries<T>(
+              endpoint,
+              {
+                retries: baseConfig.retries,
+                timeout: baseConfig.timeout,
+                download: baseConfig.download,
+                ...baseConfig.filename !== undefined ? { filename: baseConfig.filename } : {}
+              },
+              () => this.executeRequest<T>(method, endpoint, baseConfig),
+              honorRetryAfterIfPresent
+            )
+            return { success: true, data: response as T }
+          } catch (error) {
+            return { success: false, error }
+          }
+        }
+      )
+
+    return response
+  }
+
+  /**
+   * Forwards response to multiple endpoints.
+   * @description Sends response data to all configured forwarder endpoints.
+   * @param responseData - Response data to forward
+   * @param method - HTTP method for forwarding
+   * @param config - Request configuration with forwarder
+   */
+  private static async forwardResponse<T>(
+    responseData: T,
+    _method: string,
+    config: typeof FetchClient.defaultConfig & {
+      signal?: AbortSignal
+      body?: FetchRequestBody
+      forwarder: ForwarderEndpoint<T>[]
+    }
+  ): Promise<void> {
+    const { forwarder, ...baseConfig }: typeof config = config
+    const forwarderConfig: ForwarderConfig<T> =
+      ForwarderHandler.createConfigFromForwarders(forwarder)
+    await ForwarderHandler.forwardResponse(
+      responseData,
+      forwarderConfig,
+      (endpoint: string, forwardMethod: string, body?: unknown, headers?: Record<string, string>) =>
+        this.executeRequest(forwardMethod, endpoint, {
+          ...baseConfig,
+          body: body as FetchRequestBody,
+          headers: headers ?? {}
+        })
+    )
   }
 }

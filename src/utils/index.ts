@@ -131,3 +131,9 @@ export * from '@utils/Parser'
  * @description Provides retry-after header parsing utilities.
  */
 export * from '@utils/RetryAfter'
+
+/**
+ * Re-exports URL validation utilities.
+ * @description Provides URL validation utilities from the validator module.
+ */
+export * from '@utils/Validator'

@@ -4,10 +4,20 @@
  */
 export { default } from '@core/Fetch'
 export type {
+  BalancerConfig,
+  BalancerExecutor,
+  BalancerResult,
+  BalancerStrategy,
   FetchError,
   FetchOptions,
-  FetchResponse,
   FetchRequestBody,
+  FetchResponse,
+  ForwarderCompletionCallback,
+  ForwarderConfig,
+  ForwarderEndpoint,
+  ForwarderExecutor,
+  ForwarderResult,
   TimeoutController
 } from '@interfaces/index'
 export { createHeaders } from '@utils/index'
+export { BalancerHandler, ForwarderHandler } from '@core/index'

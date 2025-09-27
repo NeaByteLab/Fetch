@@ -1,3 +1,5 @@
+import type { BalancerConfig, ForwarderEndpoint } from '@interfaces/index'
+
 /**
  * Response value returned by the client.
  * @description Can be a parsed value, a stream of values, or undefined for no-body responses.
@@ -22,6 +24,8 @@ export type FetchRequestBody =
  * @description HTTP request configuration options.
  */
 export interface FetchOptions {
+  /** Load balancer configuration */
+  balancer?: BalancerConfig
   /** Base URL for relative requests */
   baseURL?: string
   /** Request body data */
@@ -30,6 +34,8 @@ export interface FetchOptions {
   download?: boolean
   /** Filename for downloads */
   filename?: string
+  /** Response forwarding configuration */
+  forwarder?: ForwarderEndpoint[]
   /** Additional request headers */
   headers?: Record<string, string>
   /** Progress callback for downloads */
