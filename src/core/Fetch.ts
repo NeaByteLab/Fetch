@@ -156,6 +156,20 @@ export default class FetchClient {
   }
 
   /**
+   * Sends a TRACE request.
+   * @description Makes a TRACE request to the specified URL.
+   * @param url - Target URL or path
+   * @param options - Request configuration
+   * @returns Parsed response
+   */
+  static async trace<T = unknown>(
+    url: string,
+    options: FetchOptions = {}
+  ): Promise<FetchResponse<T> | FetchResponse<T[]>> {
+    return this.request<T>(httpMethods.TRACE, url, options)
+  }
+
+  /**
    * Creates request options with an optional body.
    * @description Merges base options with optional body for request configuration.
    * @param options - Base options

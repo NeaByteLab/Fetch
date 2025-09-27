@@ -149,4 +149,22 @@ export class HttpMethods {
       return requestHandler(httpMethods.OPTIONS, url, options)
     }
   }
+
+  /**
+   * Creates a TRACE request handler.
+   * @description Factory method for TRACE requests.
+   * @param requestHandler - Core request handler function
+   * @returns TRACE request method
+   */
+  static createTrace<T = unknown>(
+    requestHandler: (
+      method: string,
+      url: string,
+      options: FetchOptions
+    ) => Promise<FetchResponse<T>>
+  ) {
+    return async (url: string, options: FetchOptions = {}): Promise<FetchResponse<T>> => {
+      return requestHandler(httpMethods.TRACE, url, options)
+    }
+  }
 }

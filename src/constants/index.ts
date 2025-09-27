@@ -46,6 +46,7 @@ export const httpMethods: {
   readonly DELETE: string
   readonly HEAD: string
   readonly OPTIONS: string
+  readonly TRACE: string
 } = {
   GET: 'GET',
   POST: 'POST',
@@ -53,7 +54,8 @@ export const httpMethods: {
   PATCH: 'PATCH',
   DELETE: 'DELETE',
   HEAD: 'HEAD',
-  OPTIONS: 'OPTIONS'
+  OPTIONS: 'OPTIONS',
+  TRACE: 'TRACE'
 } as const
 
 /**

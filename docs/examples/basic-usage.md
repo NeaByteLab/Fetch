@@ -128,6 +128,20 @@ const allowedMethods = await fetch.options('https://api.example.com/data', {
 })
 ```
 
+### TRACE Request
+
+```typescript
+// Trace request (echoes back the request message)
+const traceResponse = await fetch.trace('https://api.example.com/data')
+
+// TRACE with custom headers
+const traceWithHeaders = await fetch.trace('https://api.example.com/data', {
+  headers: {
+    'Custom-Header': 'value'
+  }
+})
+```
+
 ## ⚙️ Common Configuration
 
 ### Base URL

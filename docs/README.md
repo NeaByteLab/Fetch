@@ -22,6 +22,7 @@ For installation and basic setup, see the main [README](../README.md).
 - `fetch.delete(url, options?)` - DELETE request
 - `fetch.head(url, options?)` - HEAD request
 - `fetch.options(url, options?)` - OPTIONS request
+- `fetch.trace(url, options?)` - TRACE request
 
 ### Import & Usage
 

@@ -22,7 +22,9 @@ test.describe('@neabyte/fetch Module Loading Tests', () => {
         hasPostMethod: typeof window.fetchClient?.post === 'function',
         hasPutMethod: typeof window.fetchClient?.put === 'function',
         hasDeleteMethod: typeof window.fetchClient?.delete === 'function',
-        hasHeadMethod: typeof window.fetchClient?.head === 'function'
+        hasHeadMethod: typeof window.fetchClient?.head === 'function',
+        hasOptionsMethod: typeof window.fetchClient?.options === 'function',
+        hasTraceMethod: typeof window.fetchClient?.trace === 'function'
       }
     })
     expect(result.fetchClientExists).toBe(true)
@@ -32,6 +34,8 @@ test.describe('@neabyte/fetch Module Loading Tests', () => {
     expect(result.hasPutMethod).toBe(true)
     expect(result.hasDeleteMethod).toBe(true)
     expect(result.hasHeadMethod).toBe(true)
+    expect(result.hasOptionsMethod).toBe(true)
+    expect(result.hasTraceMethod).toBe(true)
   })
 
   test('should be able to make a simple GET request', async () => {
@@ -155,6 +159,58 @@ test.describe('@neabyte/fetch Module Loading Tests', () => {
       })
       expect(result.success).toBe(true)
       expect(result.isHeadRequest).toBe(true)
+    })
+
+    test('OPTIONS request should work', async () => {
+      const result = await page.evaluate(async () => {
+        try {
+          const data = await window.fetchClient.options('https://httpbin.org/anything')
+          return {
+            success: true,
+            data: data,
+            isOptionsRequest: true
+          }
+        } catch (error) {
+          return {
+            success: false,
+            error: error.message,
+            isExpectedRejection: true,
+            isOptionsRequest: true
+          }
+        }
+      })
+      expect(result.isOptionsRequest).toBe(true)
+      if (result.success) {
+        expect(result.data).toBeUndefined()
+      } else {
+        expect(result.isExpectedRejection).toBe(true)
+      }
+    })
+
+    test('TRACE request should work', async () => {
+      const result = await page.evaluate(async () => {
+        try {
+          const data = await window.fetchClient.trace('https://httpbin.org/anything')
+          return {
+            success: true,
+            data: data,
+            isTraceRequest: true
+          }
+        } catch (error) {
+          return {
+            success: false,
+            error: error.message,
+            isTraceRequest: true,
+            isExpectedRejection: true
+          }
+        }
+      })
+      expect(result.isTraceRequest).toBe(true)
+      if (result.success) {
+        expect(result.data).toBeDefined()
+      } else {
+        expect(result.isExpectedRejection).toBe(true)
+      }
     })
   })
 
