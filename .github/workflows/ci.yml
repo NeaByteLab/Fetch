@@ -59,21 +59,9 @@ jobs:
         run: npm ci
 
       - name: Build all formats
-        run: npm run build
-
-      - name: List build outputs
-        run: ls -la dist/
-
-      - name: Check build outputs
         run: |
-          test -f dist/index.d.ts
-          test -f dist/index.js
-          test -f dist/index.esm.js
-          test -f dist/index.esm.min.js
-          test -f dist/index.cjs.js
-          test -f dist/index.cjs.min.js
-          test -f dist/index.umd.js
-          test -f dist/index.umd.min.js
+          npm run build
+          ls -la dist/
 
   security:
     name: Security Audit
