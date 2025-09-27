@@ -1,5 +1,11 @@
-import type { FetchOptions, FetchRequestBody, FetchResponse } from '@interfaces/index'
-import { FetchError } from '@interfaces/index'
+import {
+  FetchError,
+  type FetchOptions,
+  type FetchRequestBody,
+  type FetchResponse
+} from '@interfaces/index'
+import { contentTypes, defaults, errorMessages, headers, httpMethods, misc } from '@constants/index'
+import { buildUrl, buildRequestInit, handleDownload } from '@core/index'
 import {
   createTimeoutController,
   cleanupController,
@@ -8,9 +14,6 @@ import {
   parseResponseWithProgress,
   isJsonContentType
 } from '@utils/index'
-import { contentTypes, defaults, errorMessages, headers, httpMethods, misc } from '@constants/index'
-import { buildUrl, buildRequestInit } from '@core/Builder'
-import { handleDownload } from '@core/Blob'
 
 /**
  * HTTP client with retries, timeouts, streaming, and optional download support.
@@ -285,15 +288,7 @@ export default class FetchClient {
         return { success: true, data: stream as T }
       }
       if (config.download) {
-        const downloadConfig: { filename?: string; onProgress?: (percentage: number) => void } = {}
-        if (config.filename !== undefined) {
-          downloadConfig.filename = config.filename
-        }
-        if (config.onProgress !== undefined) {
-          downloadConfig.onProgress = config.onProgress
-        }
-        await handleDownload(response, downloadConfig)
-        return { success: true, data: undefined as T }
+        return await this.handleDownloadResponse<T>(response, config)
       }
       type ParseConfig = {
         responseType: 'auto' | 'json' | 'text' | 'buffer' | 'blob'
@@ -384,7 +379,7 @@ export default class FetchClient {
   private static createStreamIterator<T>(response: Response, url: string): AsyncIterable<T> {
     const bodyStream: ReadableStream<Uint8Array> | null = response.body
     if (!bodyStream) {
-      throw new FetchError('Response body is null', undefined, null, url)
+      throw new FetchError(errorMessages.RESPONSE_BODY_NULL, undefined, null, url)
     }
     return {
       async *[Symbol.asyncIterator](): AsyncIterableIterator<T> {
@@ -414,6 +409,67 @@ export default class FetchClient {
         }
       }
     }
+  }
+
+  /**
+   * Handles download response processing.
+   * @description Processes download configuration and returns download information.
+   * @param response - The response to process
+   * @param config - Download configuration
+   * @returns Download information result
+   */
+  private static async handleDownloadResponse<T>(
+    response: Response,
+    config: typeof FetchClient.defaultConfig & {
+      filename?: string
+      onProgress?: (percentage: number) => void
+    }
+  ): Promise<{ success: true; data: T }> {
+    const downloadConfig: { filename?: string; onProgress?: (percentage: number) => void } = {}
+    if (config.filename !== undefined) {
+      downloadConfig.filename = config.filename
+    }
+    if (config.onProgress !== undefined) {
+      downloadConfig.onProgress = config.onProgress
+    }
+    await handleDownload(response, downloadConfig)
+    const contentLength: string | null = response.headers.get('content-length')
+    const contentType: string | null = response.headers.get('content-type')
+    const downloadInfo: {
+      filename: string
+      size: number
+      type: string
+      status: number
+      ok: boolean
+    } = {
+      filename: config.filename ?? 'download',
+      size: contentLength !== null ? parseInt(contentLength, 10) : 0,
+      type: contentType ?? 'application/octet-stream',
+      status: response.status,
+      ok: response.ok
+    }
+    return { success: true, data: downloadInfo as T }
+  }
+
+  /**
+   * Reads and decodes a single stream chunk.
+   * @description Reads a chunk from the stream and decodes it to a string.
+   * @param reader - Stream reader
+   * @param decoder - Text decoder
+   * @returns Decoded string or null when complete
+   */
+  private static async readDecodedChunk(
+    reader: ReadableStreamDefaultReader<Uint8Array>,
+    decoder: TextDecoder
+  ): Promise<string | null> {
+    const { done, value }: { done: boolean; value: Uint8Array | undefined } = await reader.read()
+    if (done) {
+      return null
+    }
+    if (value === undefined) {
+      return ''
+    }
+    return decoder.decode(value, { stream: true })
   }
 
   /**
@@ -469,27 +525,6 @@ export default class FetchClient {
     if (trimmed.length > 0) {
       yield* FetchClient.safeParseJsonLine<T>(trimmed, url)
     }
-  }
-
-  /**
-   * Reads and decodes a single stream chunk.
-   * @description Reads a chunk from the stream and decodes it to a string.
-   * @param reader - Stream reader
-   * @param decoder - Text decoder
-   * @returns Decoded string or null when complete
-   */
-  private static async readDecodedChunk(
-    reader: ReadableStreamDefaultReader<Uint8Array>,
-    decoder: TextDecoder
-  ): Promise<string | null> {
-    const { done, value }: { done: boolean; value: Uint8Array | undefined } = await reader.read()
-    if (done) {
-      return null
-    }
-    if (value === undefined) {
-      return ''
-    }
-    return decoder.decode(value, { stream: true })
   }
 
   /**

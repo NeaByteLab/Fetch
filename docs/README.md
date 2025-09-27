@@ -1,0 +1,61 @@
+# Documentation
+
+This folder contains detailed documentation and examples for the @neabyte/fetch library.
+
+## 📚 Contents
+
+- **Examples** - Code examples and usage patterns
+- **API Reference** - Detailed API documentation
+- **TypeScript Types** - Type definitions and interfaces
+- **Guides** - Step-by-step guides for common use cases
+
+## 🚀 Quick Start
+
+For installation and basic setup, see the main [README](../README.md).
+
+## 🔧 Available Methods
+
+- `fetch.get(url, options?)` - GET request
+- `fetch.post(url, body?, options?)` - POST request
+- `fetch.put(url, body?, options?)` - PUT request
+- `fetch.patch(url, body?, options?)` - PATCH request
+- `fetch.delete(url, options?)` - DELETE request
+- `fetch.head(url, options?)` - HEAD request
+- `fetch.options(url, options?)` - OPTIONS request
+
+### Configuration Options
+
+```typescript
+interface FetchOptions {
+  timeout?: number                       // Request timeout in ms (default: 30000)
+  retries?: number                       // Number of retry attempts (default: 1)
+  headers?: Record<string, string>       // Additional headers
+  baseURL?: string                       // Base URL for relative URLs
+  signal?: AbortSignal                   // Abort signal for cancellation
+  stream?: boolean                       // Enable streaming response (default: false)
+  download?: boolean                     // Enable file download (default: false)
+  filename?: string                       // Filename for download (required if download: true)
+  // Response parsing type (default: 'auto')
+  responseType?: 'auto' | 'json' | 'text' | 'buffer' | 'blob'
+  // Progress callback for uploads and downloads
+  onProgress?: (percentage: number) => void
+}
+```
+
+---
+
+## 📖 Examples
+
+Detailed examples are organized by category:
+
+- [Basic Usage](./examples/basic-usage.md)
+- [Advanced Usage](./examples/advanced-usage.md)
+- [Streaming](./examples/streaming.md)
+- [Progress Tracking](./examples/progress-tracking.md)
+- [Error Handling](./examples/error-handling.md)
+
+## 🔗 Links
+
+- [Main README](../README.md)
+- [GitHub Repository](https://github.com/NeaByteLab/Fetch)
+- [NPM Package](https://www.npmjs.com/package/@neabyte/fetch)

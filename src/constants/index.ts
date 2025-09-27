@@ -64,6 +64,7 @@ export const errorMessages: {
   readonly ABORTED: string
   readonly CONTENT_TYPE_NULL: string
   readonly RESPONSE_BODY_NULL: string
+  readonly RESPONSE_TOO_LARGE: string
   readonly FILENAME_REQUIRED: string
   readonly FILENAME_UNDEFINED: string
   readonly PROGRESS_CALLBACK_UNDEFINED: string
@@ -72,11 +73,11 @@ export const errorMessages: {
   readonly URL_INVALID: string
   readonly TIMEOUT_NON_NEGATIVE: string
   readonly UNKNOWN_ERROR: string
-  readonly RESPONSE_BODY_NULL_GENERIC: string
 } = {
   ABORTED: 'Request aborted',
   CONTENT_TYPE_NULL: 'Content type is null',
   RESPONSE_BODY_NULL: 'Response body is null',
+  RESPONSE_TOO_LARGE: 'Response too large',
   FILENAME_REQUIRED: 'Filename is required when download is enabled',
   FILENAME_UNDEFINED: 'Filename is undefined',
   PROGRESS_CALLBACK_UNDEFINED: 'Progress callback is undefined',
@@ -84,8 +85,7 @@ export const errorMessages: {
   STREAM_PARSE_PREFIX: 'Failed to parse streaming response: ',
   URL_INVALID: 'URL must be a non-empty string',
   TIMEOUT_NON_NEGATIVE: 'Timeout must be a non-negative number',
-  UNKNOWN_ERROR: 'Unknown error',
-  RESPONSE_BODY_NULL_GENERIC: 'Response body is null'
+  UNKNOWN_ERROR: 'Unknown error'
 } as const
 
 /**

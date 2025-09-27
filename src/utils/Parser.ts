@@ -57,11 +57,7 @@ export async function parseByContentType<T>(
   contentType: string | null,
   method?: string
 ): Promise<T> {
-  if (
-    method === httpMethods.HEAD ||
-    method === httpMethods.OPTIONS ||
-    method === httpMethods.DELETE
-  ) {
+  if (method === httpMethods.HEAD) {
     return undefined as T
   }
   if (isJsonContentType(contentType)) {
@@ -100,11 +96,7 @@ export async function parseResponseByType<T>(
   method?: string
 ): Promise<T> {
   const contentType: string | null = response.headers.get(headers.CONTENT_TYPE)
-  if (
-    method === httpMethods.HEAD ||
-    method === httpMethods.OPTIONS ||
-    method === httpMethods.DELETE
-  ) {
+  if (method === httpMethods.HEAD) {
     return undefined as T
   }
   if (config.responseType !== 'auto') {
@@ -169,7 +161,7 @@ export async function parseResponseWithProgressTracking<T>(
         received += value.length
       }
       if (received > misc.MAX_NDJSON_BUFFER_BYTES) {
-        throw new FetchError('Response too large', undefined, undefined, url)
+        throw new FetchError(errorMessages.RESPONSE_TOO_LARGE, undefined, undefined, url)
       }
       if (total > 0 && config.onProgress !== undefined) {
         const percentage: number = Math.round((received / total) * 100)

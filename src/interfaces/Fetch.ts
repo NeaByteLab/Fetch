@@ -19,20 +19,31 @@ export type FetchRequestBody =
 
 /**
  * Options for configuring a request.
- * @description Controls timeouts, retries, headers, base URL, body, streaming, and parsing behavior.
+ * @description HTTP request configuration options.
  */
 export interface FetchOptions {
-  timeout?: number
-  retries?: number
-  headers?: Record<string, string>
+  /** Base URL for relative requests */
   baseURL?: string
-  signal?: AbortSignal
+  /** Request body data */
   body?: FetchRequestBody
-  stream?: boolean
+  /** Enable file download mode */
   download?: boolean
+  /** Filename for downloads */
   filename?: string
-  responseType?: 'auto' | 'json' | 'text' | 'buffer' | 'blob'
+  /** Additional request headers */
+  headers?: Record<string, string>
+  /** Progress callback for downloads */
   onProgress?: (percentage: number) => void
+  /** Number of retry attempts */
+  retries?: number
+  /** Response parsing type */
+  responseType?: 'auto' | 'json' | 'text' | 'buffer' | 'blob'
+  /** Abort signal for cancellation */
+  signal?: AbortSignal
+  /** Enable streaming response */
+  stream?: boolean
+  /** Request timeout in milliseconds */
+  timeout?: number
 }
 
 /**

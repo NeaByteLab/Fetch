@@ -22,11 +22,56 @@ export function buildUrl(url: string, baseURL: string): string {
 }
 
 /**
+ * Processes request body and returns body with duplex flag.
+ * @description Handles different body types and progress tracking.
+ * @param body - Request body to process
+ * @param headers - Request headers
+ * @param onProgress - Optional progress callback
+ * @returns Object with processed body and duplex flag
+ */
+function processRequestBody(
+  body: FetchRequestBody,
+  headers: Record<string, string>,
+  onProgress?: (percentage: number) => void
+): { body: BodyInit; needsDuplex: boolean } {
+  if (isValidBodyInit(body)) {
+    if (onProgress) {
+      return {
+        body: createBodyWithProgress(body as BodyInit, onProgress),
+        needsDuplex: true
+      }
+    }
+    return { body: body as BodyInit, needsDuplex: false }
+  }
+  if (typeof body === 'object' && body != null) {
+    headers['Content-Type'] ??= contentTypes.APPLICATION_JSON
+    const serializedBody: string = serializeObjectBody(body as Record<string, unknown>, headers)
+    if (onProgress) {
+      return {
+        body: createBodyWithProgress(serializedBody, onProgress),
+        needsDuplex: true
+      }
+    }
+    return { body: serializedBody, needsDuplex: false }
+  }
+  const stringBody: string = String(body)
+  headers['Content-Type'] ??= contentTypes.TEXT_PLAIN
+  if (onProgress) {
+    return {
+      body: createBodyWithProgress(stringBody, onProgress),
+      needsDuplex: true
+    }
+  }
+  return { body: stringBody, needsDuplex: false }
+}
+
+/**
  * Creates a RequestInit object for fetch calls.
  * @description Includes method, headers, optional body, and optional abort signal.
  * @param method - HTTP method name
  * @param config - Headers and optional body and signal
  * @param controller - Optional controller to provide a signal
+ * @param onProgress - Optional progress callback for uploads
  * @returns RequestInit suitable for fetch
  */
 export function buildRequestInit(
@@ -36,7 +81,8 @@ export function buildRequestInit(
     signal?: AbortSignal
     body?: FetchRequestBody
   },
-  controller?: AbortController
+  controller?: AbortController,
+  onProgress?: (percentage: number) => void
 ): RequestInit {
   const requestInit: RequestInit = {
     method,
@@ -48,17 +94,14 @@ export function buildRequestInit(
     httpMethods.PATCH
   ] as const
   if (config.body !== undefined && methodsWithBody.includes(method)) {
-    const reqBody: FetchRequestBody = config.body
-    if (isValidBodyInit(reqBody)) {
-      requestInit.body = reqBody as BodyInit
-      if (requestInit.headers instanceof Headers) {
-        requestInit.headers.delete('Content-Type')
-      }
-    } else if (typeof reqBody === 'object' && reqBody != null) {
-      config.headers['Content-Type'] ??= contentTypes.APPLICATION_JSON
-      requestInit.body = serializeObjectBody(reqBody as Record<string, unknown>, config.headers)
-    } else {
-      requestInit.body = String(reqBody)
+    const bodyResult: { body: BodyInit; needsDuplex: boolean } = processRequestBody(
+      config.body,
+      config.headers,
+      onProgress
+    )
+    requestInit.body = bodyResult.body
+    if (bodyResult.needsDuplex) {
+      ;(requestInit as Record<string, unknown>)['duplex'] = 'half'
     }
   }
   if (config.signal) {
@@ -136,4 +179,108 @@ export function createFormData(body: Record<string, unknown>): URLSearchParams {
     }
   }
   return formData
+}
+
+/**
+ * Calculates total bytes for a body.
+ * @description Determines the total size of different body types.
+ * @param body - The body to measure
+ * @returns Total bytes or 1 for unknown sizes
+ */
+function calculateBodySize(body: BodyInit): number {
+  if (typeof body === 'string') {
+    return new TextEncoder().encode(body).length
+  }
+  if (body instanceof ArrayBuffer) {
+    return body.byteLength
+  }
+  if (body instanceof Uint8Array) {
+    return body.length
+  }
+  if (body instanceof Blob) {
+    return body.size
+  }
+  if (body instanceof FormData || body instanceof URLSearchParams) {
+    // Will be updated as we read
+    return 1
+  }
+  return 1
+}
+
+/**
+ * Converts body to Uint8Array for streaming.
+ * @description Handles different body types and converts them to bytes.
+ * @param body - The body to convert
+ * @returns Uint8Array representation of the body
+ */
+function convertBodyToBytes(body: BodyInit): Uint8Array {
+  if (typeof body === 'string') {
+    return new TextEncoder().encode(body)
+  }
+  if (body instanceof ArrayBuffer) {
+    return new Uint8Array(body)
+  }
+  if (body instanceof Uint8Array) {
+    return body
+  }
+  let bodyString: string
+  if (body instanceof FormData) {
+    bodyString = 'FormData'
+  } else if (body instanceof URLSearchParams) {
+    bodyString = body.toString()
+  } else {
+    bodyString = typeof body === 'object' ? JSON.stringify(body) : String(body)
+  }
+  return new TextEncoder().encode(bodyString)
+}
+
+/**
+ * Creates a body with upload progress tracking.
+ * @description Wraps a body in a ReadableStream that tracks upload progress.
+ * @param body - The body to wrap
+ * @param onProgress - Progress callback function
+ * @returns ReadableStream with progress tracking
+ */
+export function createBodyWithProgress(
+  body: BodyInit,
+  onProgress: (percentage: number) => void
+): ReadableStream<Uint8Array> {
+  const totalBytes: number = calculateBodySize(body)
+  let uploadedBytes: number = 0
+  if (body instanceof Blob) {
+    return new ReadableStream<Uint8Array>({
+      async start(controller: ReadableStreamDefaultController<Uint8Array>): Promise<void> {
+        try {
+          const arrayBuffer: ArrayBuffer = await body.arrayBuffer()
+          const bytes: Uint8Array = new Uint8Array(arrayBuffer)
+          const actualTotalBytes: number = bytes.length
+          const chunkSize: number = Math.max(1024, Math.floor(actualTotalBytes / 100))
+          for (let i: number = 0; i < bytes.length; i += chunkSize) {
+            const chunk: Uint8Array = bytes.slice(i, i + chunkSize)
+            controller.enqueue(chunk)
+            uploadedBytes += chunk.length
+            const percentage: number = Math.round((uploadedBytes / actualTotalBytes) * 100)
+            onProgress(Math.min(percentage, 100))
+          }
+          controller.close()
+        } catch (error) {
+          controller.error(error)
+        }
+      }
+    })
+  }
+  const bodyBytes: Uint8Array = convertBodyToBytes(body)
+  return new ReadableStream<Uint8Array>({
+    start(controller: ReadableStreamDefaultController<Uint8Array>): void {
+      const chunkSize: number = Math.max(1024, Math.floor(totalBytes / 100))
+      for (let i: number = 0; i < bodyBytes.length; i += chunkSize) {
+        const chunk: Uint8Array = bodyBytes.slice(i, i + chunkSize)
+        controller.enqueue(chunk)
+        uploadedBytes += chunk.length
+        const percentage: number = Math.round((uploadedBytes / totalBytes) * 100)
+        onProgress(Math.min(percentage, 100))
+      }
+      controller.close()
+    }
+  })
 }

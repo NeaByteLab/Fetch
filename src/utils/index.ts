@@ -125,3 +125,9 @@ export function createHeaders(headers: Record<string, string> = {}): Headers {
  * @description Provides response parsing helpers from the parser module.
  */
 export * from '@utils/Parser'
+
+/**
+ * Re-exports retry-after utilities.
+ * @description Provides retry-after header parsing utilities.
+ */
+export * from '@utils/RetryAfter'
