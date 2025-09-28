@@ -26,19 +26,11 @@ import { FetchError } from '@interfaces/index'
 async function parseJsonWithFallback<T>(response: Response): Promise<T> {
   try {
     return (await response.json()) as T
-  } catch (jsonError) {
+  } catch {
     try {
       const text: string = await response.text()
-      console.warn(
-        'Failed to parse JSON, falling back to text:',
-        jsonError instanceof Error ? jsonError.message : errorMessages.UNKNOWN_ERROR
-      )
       return text as T
-    } catch (textError) {
-      console.warn('Failed to parse response as JSON or text:', {
-        jsonError: jsonError instanceof Error ? jsonError.message : errorMessages.UNKNOWN_ERROR,
-        textError: textError instanceof Error ? textError.message : errorMessages.UNKNOWN_ERROR
-      })
+    } catch {
       return undefined as T
     }
   }

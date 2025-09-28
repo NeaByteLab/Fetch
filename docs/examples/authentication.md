@@ -333,9 +333,9 @@ const response = await fetch.get('/api/data', { auth: authConfig })
 ## 🚀 Next Steps
 
 - [SSL Pinning](./ssl-pinning.md) - SSL certificate pinning for enhanced security
-- [Advanced Usage](./advanced-usage.md) - Configuration options and patterns
-- [Error Handling](./error-handling.md) - Error handling patterns
 - [Request Balancer](./request-balancer.md) - Load balancing and failover examples
 - [Response Forwarder](./response-forwarder.md) - Response forwarding and observability examples
 - [Progress Tracking](./progress-tracking.md) - Upload and download progress
-- [Streaming](./streaming.md) - Real-time data streaming
+- [Streaming](./streaming.md) - Real-time data streaming / chunking
+- [Advanced Usage](./advanced-usage.md) - Configuration options and patterns
+- [Error Handling](./error-handling.md) - Error handling patterns

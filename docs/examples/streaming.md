@@ -286,16 +286,7 @@ const processedData = await mapStream(
 - Use stream utilities for common operations
 - Monitor stream performance and rate
 
-## 🎉 Complete Documentation
+## 🚀 Next Steps
 
-You've now covered all the features of the Fetch library:
-
-- [Basic Usage](./basic-usage.md) - HTTP methods and common usage patterns
-- [Authentication](./authentication.md) - Basic, Bearer, and API key authentication
-- [SSL Pinning](./ssl-pinning.md) - SSL certificate pinning for enhanced security
 - [Advanced Usage](./advanced-usage.md) - Configuration options and patterns
 - [Error Handling](./error-handling.md) - Error handling patterns
-- [Request Balancer](./request-balancer.md) - Load balancing and failover examples
-- [Response Forwarder](./response-forwarder.md) - Response forwarding and observability examples
-- [Progress Tracking](./progress-tracking.md) - Upload and download progress
-- [Streaming](./streaming.md) - Real-time data streaming

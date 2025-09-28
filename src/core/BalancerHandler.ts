@@ -21,7 +21,7 @@ import {
   type BalancerResult,
   type BalancerExecutor
 } from '@interfaces/index'
-import { errorMessages } from '@constants/index'
+import { errorMessages, schemes } from '@constants/index'
 import { isValidURL } from '@utils/index'
 
 /**
@@ -184,7 +184,7 @@ export class BalancerHandler {
     if (!url || url.trim() === '') {
       return baseUrl
     }
-    if (url.startsWith('http://') || url.startsWith('https://')) {
+    if (url.startsWith(schemes.HTTP) || url.startsWith(schemes.HTTPS)) {
       return url
     }
     const path: string = url.startsWith('/') ? url : `/${url}`

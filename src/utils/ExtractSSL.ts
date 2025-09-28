@@ -161,7 +161,7 @@ export class ExtractSSL {
         )
       }
       const isValidPin: boolean = limitedPins.some((pin: string) => {
-        return certHash.slice(0, 50) === pin.slice(0, 50)
+        return certHash.slice(0, 44) === pin.slice(0, 44)
       })
       if (!isValidPin) {
         throw new FetchError(errorMessages.SSL_PINNING_VALIDATION_FAILED, undefined, undefined, url)

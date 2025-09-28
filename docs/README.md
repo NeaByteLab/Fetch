@@ -27,64 +27,83 @@ For installation and basic setup, see the main [README](../README.md).
 ### Import & Usage
 
 ```typescript
-// Main class
+// Main class and error handling
 import fetch, { FetchError } from '@neabyte/fetch'
 
 // TypeScript types
-import type {
-  AuthApiKey,
-  AuthBasic,
-  AuthBearer,
-  AuthConfig,
-  BalancerConfig,
-  FetchOptions,
-  FetchRequestBody,
-  FetchResponse,
-  ForwarderEndpoint,
-  TimeoutController
-} from '@neabyte/fetch'
-
-// Additional handlers (optional)
-import { BalancerHandler, ForwarderHandler } from '@neabyte/fetch'
-
-// Utility functions
-import { createHeaders, createAuthHeaders } from '@neabyte/fetch'
-
+import type { AuthConfig } from '@neabyte/fetch'
 ```
 
 ### Configuration Options
-
 ```typescript
+type FetchRequestBody =
+  | string
+  | FormData
+  | URLSearchParams
+  | Blob
+  | ArrayBuffer
+  | Uint8Array
+  | Record<string, unknown>
+
+type FetchResponseType = 'auto' | 'json' | 'text' | 'buffer' | 'blob'
+
+interface BalancerConfig {
+  /** Array of endpoint URLs to balance across */
+  endpoints: string[]
+  /** Load balancing strategy to use */
+  strategy: 'fastest' | 'parallel'
+}
+
+interface ForwarderEndpoint<T = unknown> {
+  /** HTTP method for forwarding */
+  method: string
+  /** URL to forward to */
+  url: string
+  /** Headers to include in forwarded request */
+  headers?: Record<string, string>
+  /** Request body to forward - can be static data or a function that receives original response */
+  body?: ForwarderBodyFunction<T> | Record<string, unknown> | string | number | boolean | null
+  /** Timeout for this forwarder endpoint (ms) */
+  timeout?: number
+  /** Number of retry attempts for this forwarder endpoint */
+  retries?: number
+  /** SSL pinning hashes for certificate validation */
+  sslPinning?: string[]
+}
+
 interface FetchOptions {
-  // Authentication
-  auth?: AuthConfig                      // Authentication configuration (Basic, Bearer, API Key)
-
-  // Basic configuration
-  timeout?: number                       // Request timeout in ms (default: 30000)
-  retries?: number                       // Number of retry attempts (default: 1)
-  headers?: Record<string, string>       // Additional headers
-  baseURL?: string                       // Base URL for relative URLs
-  signal?: AbortSignal                   // Abort signal for cancellation
-
-  // Response handling
-  stream?: boolean                       // Enable streaming response (default: false)
-  download?: boolean                     // Enable file download (default: false)
-  filename?: string                      // Filename for download (required if download: true)
-
-  // Response parsing type (default: 'auto')
-  responseType?: 'auto' | 'json' | 'text' | 'buffer' | 'blob'
-
-  // Security
-  sslPinning?: string[]                  // SSL certificate pinning hashes (max 20)
-
-  // Additional features
-  body?: FetchRequestBody                // Request body data
-  maxRate?: number                       // Rate limiting in bytes per second
-  balancer?: BalancerConfig              // Load balancer configuration
-  forwarder?: ForwarderEndpoint[]        // Response forwarding configuration
-
-  // Progress callback for uploads and downloads
+  /** Authentication configuration */
+  auth?: AuthConfig
+  /** Load balancer configuration */
+  balancer?: BalancerConfig
+  /** Base URL for relative requests */
+  baseURL?: string
+  /** Request body data */
+  body?: FetchRequestBody
+  /** Enable file download mode */
+  download?: boolean
+  /** Filename for downloads */
+  filename?: string
+  /** Response forwarding configuration */
+  forwarder?: ForwarderEndpoint[]
+  /** Additional request headers */
+  headers?: Record<string, string>
+  /** Maximum transfer rate in bytes per second (for downloads/uploads) */
+  maxRate?: number
+  /** Progress callback for downloads */
   onProgress?: (percentage: number) => void
+  /** Number of retry attempts */
+  retries?: number
+  /** Response parsing type */
+  responseType?: FetchResponseType
+  /** Abort signal for cancellation */
+  signal?: AbortSignal
+  /** SSL pinning hashes for certificate validation */
+  sslPinning?: string[]
+  /** Enable streaming response */
+  stream?: boolean
+  /** Request timeout in milliseconds */
+  timeout?: number
 }
 ```
 
@@ -92,30 +111,39 @@ interface FetchOptions {
 
 ## 📖 Examples
 
-### 🚀 TypeScript Examples (Live Code)
-Ready-to-run TypeScript examples with full type safety:
+### 📚 Documentation & Examples
+Guides with markdown explanations and TypeScript code:
 
-- [General Usage](../examples/general-usage.ts) - Using all available HTTP methods
-- [Request Balancer](../examples/request-balancer.ts) - Load balancing and failover examples
+- **[General Usage](./examples/general-usage.md)** - HTTP methods and common usage patterns
+  - 📁 [TypeScript Code | ./examples/general-usage.ts](../examples/general-usage.ts)
+
+- **[Authentication](./examples/authentication.md)** - Basic, Bearer, and API key authentication
+  - 📁 [TypeScript Code | ./examples/authentication.ts](../examples/authentication.ts)
+
+- **[SSL Pinning](./examples/ssl-pinning.md)** - SSL certificate pinning for enhanced security
+  - 📁 [TypeScript Code | ./examples/ssl-pinning.ts](../examples/ssl-pinning.ts)
+
+- **[Request Balancer](./examples/request-balancer.md)** - Load balancing and failover examples
+  - 📁 [TypeScript Code | ./examples/request-balancer.ts](../examples/request-balancer.ts)
+
+- **[Response Forwarder](./examples/response-forwarder.md)** - Response forwarding and observability examples
+  - 📁 [TypeScript Code | ./examples/response-forwarder.ts](../examples/response-forwarder.ts)
+
+- **[Progress Tracking](./examples/progress-tracking.md)** - Upload and download progress
+  - 📁 [TypeScript Code | ./examples/progress-tracking.ts](../examples/progress-tracking.ts)
+
+- **[Streaming](./examples/streaming.md)** - Real-time data streaming / chunking
+  - 📁 [TypeScript Code | ./examples/streaming.ts](../examples/streaming.ts)
+
+#### 🚧 Pending Examples
+- [Advanced Usage](./examples/advanced-usage.md) - Configuration options and patterns
+- [Error Handling](./examples/error-handling.md) - Error handling patterns
 
 ### 💻 How To Run
 ```sh
-cd <path>/<project-name>
+cd <path>/Fetch
 npx tsx ./examples/filename.ts
 ```
-
-### 📚 Documentation Examples
-Detailed markdown examples with explanations:
-
-- [Basic Usage](./examples/basic-usage.md) - HTTP methods and common usage patterns
-- [Authentication](./examples/authentication.md) - Basic, Bearer, and API key authentication
-- [SSL Pinning](./examples/ssl-pinning.md) - SSL certificate pinning for enhanced security
-- [Advanced Usage](./examples/advanced-usage.md) - Configuration options and patterns
-- [Error Handling](./examples/error-handling.md) - Error handling patterns
-- [Request Balancer](./examples/request-balancer.md) - Load balancing and failover examples
-- [Response Forwarder](./examples/response-forwarder.md) - Response forwarding and observability examples
-- [Progress Tracking](./examples/progress-tracking.md) - Upload and download progress
-- [Streaming](./examples/streaming.md) - Real-time data streaming
 
 ## 🏗️ Architecture
 

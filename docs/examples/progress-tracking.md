@@ -330,4 +330,6 @@ async function uploadWithProgress(file: File) {
 
 ## 🚀 Next Steps
 
-- [Streaming](./streaming.md) - Real-time data streaming
+- [Streaming](./streaming.md) - Real-time data streaming / chunking
+- [Advanced Usage](./advanced-usage.md) - Configuration options and patterns
+- [Error Handling](./error-handling.md) - Error handling patterns

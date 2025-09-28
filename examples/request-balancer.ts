@@ -88,7 +88,7 @@ async function runAllTests(): Promise<void> {
     stopServer
   ]
   for (const [index, testTask] of listTests.entries()) {
-    console.log(`[${index + 1}] Working on ${testTask.name}`)
+    console.log(`[${index + 1}] Working on "${testTask.name}" Function...`)
     await testTask()
     console.log('-\n-')
   }

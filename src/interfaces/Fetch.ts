@@ -36,6 +36,12 @@ export type FetchRequestBody =
   | Record<string, unknown>
 
 /**
+ * Supported response types.
+ * @description Includes auto-detection, JSON, text, buffer, and blob.
+ */
+export type FetchResponseType = 'auto' | 'json' | 'text' | 'buffer' | 'blob'
+
+/**
  * Options for configuring a request.
  * @description HTTP request configuration options.
  */
@@ -63,7 +69,7 @@ export interface FetchOptions {
   /** Number of retry attempts */
   retries?: number
   /** Response parsing type */
-  responseType?: 'auto' | 'json' | 'text' | 'buffer' | 'blob'
+  responseType?: FetchResponseType
   /** Abort signal for cancellation */
   signal?: AbortSignal
   /** SSL pinning hashes for certificate validation */

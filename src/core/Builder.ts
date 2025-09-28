@@ -368,9 +368,8 @@ function createFormDataStream(
       try {
         const entries: Array<[string, string | File]> = Array.from(body.entries())
         const totalEstimatedBytes: number = calculateFormDataSize(entries)
-        const chunkSize: number = Math.max(1024, Math.floor(totalEstimatedBytes / 1000))
+        const chunkSize: number = Math.max(1024, Math.floor(totalEstimatedBytes / 100))
         let processedBytes: number = 0
-
         for (const [key, value] of entries) {
           if (value instanceof File) {
             processedBytes = await processFileEntry(
@@ -427,7 +426,7 @@ export function createBodyWithProgress(
           const arrayBuffer: ArrayBuffer = await body.arrayBuffer()
           const bytes: Uint8Array = new Uint8Array(arrayBuffer)
           const actualTotalBytes: number = bytes.length
-          const chunkSize: number = Math.max(1024, Math.floor(actualTotalBytes / 1000))
+          const chunkSize: number = Math.max(1024, Math.floor(actualTotalBytes / 100))
           for (let i: number = 0; i < bytes.length; i += chunkSize) {
             const chunk: Uint8Array = bytes.slice(i, i + chunkSize)
             if (maxRate !== undefined && maxRate > 0) {
@@ -451,7 +450,7 @@ export function createBodyWithProgress(
   const bodyBytes: Uint8Array = convertBodyToBytes(body)
   return new ReadableStream<Uint8Array>({
     async start(controller: ReadableStreamDefaultController<Uint8Array>): Promise<void> {
-      const chunkSize: number = Math.max(1024, Math.floor(totalBytes / 1000))
+      const chunkSize: number = Math.max(1024, Math.floor(totalBytes / 100))
       for (let i: number = 0; i < bodyBytes.length; i += chunkSize) {
         const chunk: Uint8Array = bodyBytes.slice(i, i + chunkSize)
         if (maxRate !== undefined && maxRate > 0) {

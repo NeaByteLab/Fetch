@@ -20,6 +20,7 @@ import {
   type FetchOptions,
   type FetchRequestBody,
   type FetchResponse,
+  type FetchResponseType,
   type ForwarderConfig,
   type ForwarderEndpoint
 } from '@interfaces/index'
@@ -316,10 +317,6 @@ export default class FetchClient {
       if (config.sslPinning && config.sslPinning.length > 0) {
         await ExtractSSL.validate(fullUrl, config.sslPinning)
       }
-      console
-        .log
-        // `Fetch.executeRequest: onProgress=${!!config.onProgress}, maxRate=${config.maxRate}`
-        ()
       const fetchOptions: RequestInit = buildRequestInit(
         method,
         config,
@@ -355,7 +352,7 @@ export default class FetchClient {
         return { success: true, data: undefined as T }
       }
       type ParseConfig = {
-        responseType: 'auto' | 'json' | 'text' | 'buffer' | 'blob'
+        responseType: FetchResponseType
       } & Partial<{ onProgress: (percentage: number) => void }>
       const parseConfig: ParseConfig = { responseType: config.responseType }
       if (config.onProgress !== undefined) {

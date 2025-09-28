@@ -20,4 +20,4 @@
  */
 export { default } from '@core/Fetch'
 export { FetchError } from '@interfaces/index'
-export type { AuthConfig, FetchOptions, FetchRequestBody, FetchResponse } from '@interfaces/index'
+export type { AuthConfig } from '@interfaces/index'

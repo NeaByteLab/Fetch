@@ -473,4 +473,6 @@ const response = await fetch.get('/api/data', {
 ## 🚀 Next Steps
 
 - [Progress Tracking](./progress-tracking.md) - Upload and download progress
-- [Streaming](./streaming.md) - Real-time data streaming
+- [Streaming](./streaming.md) - Real-time data streaming / chunking
+- [Advanced Usage](./advanced-usage.md) - Configuration options and patterns
+- [Error Handling](./error-handling.md) - Error handling patterns
