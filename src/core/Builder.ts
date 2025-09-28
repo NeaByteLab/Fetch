@@ -118,7 +118,8 @@ export function buildRequestInit(
   const methodsWithBody: readonly string[] = [
     httpMethods.POST,
     httpMethods.PUT,
-    httpMethods.PATCH
+    httpMethods.PATCH,
+    httpMethods.DELETE
   ] as const
   if (config.body !== undefined && methodsWithBody.includes(method)) {
     const bodyResult: { body: BodyInit; needsDuplex: boolean } = processRequestBody(
@@ -262,6 +263,148 @@ function convertBodyToBytes(body: BodyInit): Uint8Array {
 }
 
 /**
+ * Calculates the estimated total bytes for FormData entries.
+ * @param entries - FormData entries
+ * @returns Estimated total bytes
+ */
+function calculateFormDataSize(entries: Array<[string, string | File]>): number {
+  let totalBytes: number = 0
+  for (const [key, value] of entries) {
+    if (value instanceof File) {
+      totalBytes += value.size
+    } else {
+      totalBytes += new TextEncoder().encode(`${key}=${value}`).length
+    }
+  }
+  return totalBytes
+}
+
+/**
+ * Processes a file entry with chunking and rate limiting.
+ * @param file - File to process
+ * @param chunkSize - Size of each chunk
+ * @param maxRate - Maximum rate in bytes per second
+ * @param rateLimiter - Rate limiter instance
+ * @param controller - Stream controller
+ * @param processedBytes - Current processed bytes count
+ * @param totalBytes - Total estimated bytes
+ * @param onProgress - Progress callback
+ * @returns Updated processed bytes count
+ */
+async function processFileEntry(
+  file: File,
+  chunkSize: number,
+  maxRate: number | undefined,
+  rateLimiter: ReturnType<typeof createRateLimiter>,
+  controller: ReadableStreamDefaultController<Uint8Array>,
+  processedBytes: number,
+  totalBytes: number,
+  onProgress: ((percentage: number) => void) | undefined
+): Promise<number> {
+  const fileBytes: Uint8Array = new Uint8Array(await file.arrayBuffer())
+  let currentProcessed: number = processedBytes
+  for (let i: number = 0; i < fileBytes.length; i += chunkSize) {
+    const chunk: Uint8Array = fileBytes.slice(i, i + chunkSize)
+    if (maxRate !== undefined && maxRate > 0) {
+      await rateLimiter.throttle(chunk.length, maxRate)
+    }
+    controller.enqueue(chunk)
+    currentProcessed += chunk.length
+    const percentage: number = Math.round((currentProcessed / totalBytes) * 100)
+    onProgress?.(Math.min(percentage, 100))
+  }
+  return currentProcessed
+}
+
+/**
+ * Processes a text entry with rate limiting.
+ * @param key - FormData key
+ * @param value - FormData value
+ * @param maxRate - Maximum rate in bytes per second
+ * @param rateLimiter - Rate limiter instance
+ * @param controller - Stream controller
+ * @param processedBytes - Current processed bytes count
+ * @param totalBytes - Total estimated bytes
+ * @param onProgress - Progress callback
+ * @returns Updated processed bytes count
+ */
+async function processTextEntry(
+  key: string,
+  value: string,
+  maxRate: number | undefined,
+  rateLimiter: ReturnType<typeof createRateLimiter>,
+  controller: ReadableStreamDefaultController<Uint8Array>,
+  processedBytes: number,
+  totalBytes: number,
+  onProgress: ((percentage: number) => void) | undefined
+): Promise<number> {
+  const entryData: Uint8Array = new TextEncoder().encode(`${key}=${value}`)
+  if (maxRate !== undefined && maxRate > 0) {
+    await rateLimiter.throttle(entryData.length, maxRate)
+  }
+  controller.enqueue(entryData)
+  const newProcessed: number = processedBytes + entryData.length
+  const percentage: number = Math.round((newProcessed / totalBytes) * 100)
+  onProgress?.(Math.min(percentage, 100))
+  return newProcessed
+}
+
+/**
+ * Creates a ReadableStream for FormData with progress tracking.
+ * @param body - FormData to process
+ * @param maxRate - Maximum rate in bytes per second
+ * @param onProgress - Progress callback function
+ * @param rateLimiter - Rate limiter instance
+ * @returns ReadableStream with progress tracking
+ */
+function createFormDataStream(
+  body: FormData,
+  maxRate: number | undefined,
+  onProgress: ((percentage: number) => void) | undefined,
+  rateLimiter: ReturnType<typeof createRateLimiter>
+): ReadableStream<Uint8Array> {
+  return new ReadableStream<Uint8Array>({
+    async start(controller: ReadableStreamDefaultController<Uint8Array>): Promise<void> {
+      try {
+        const entries: Array<[string, string | File]> = Array.from(body.entries())
+        const totalEstimatedBytes: number = calculateFormDataSize(entries)
+        const chunkSize: number = Math.max(1024, Math.floor(totalEstimatedBytes / 1000))
+        let processedBytes: number = 0
+
+        for (const [key, value] of entries) {
+          if (value instanceof File) {
+            processedBytes = await processFileEntry(
+              value,
+              chunkSize,
+              maxRate,
+              rateLimiter,
+              controller,
+              processedBytes,
+              totalEstimatedBytes,
+              onProgress
+            )
+          } else {
+            processedBytes = await processTextEntry(
+              key,
+              value,
+              maxRate,
+              rateLimiter,
+              controller,
+              processedBytes,
+              totalEstimatedBytes,
+              onProgress
+            )
+          }
+        }
+        controller.close()
+      } catch (error) {
+        controller.error(error)
+      }
+    }
+  })
+}
+
+/**
  * Creates a body with upload progress tracking.
  * @description Wraps a body in a ReadableStream that tracks upload progress.
  * @param body - The body to wrap
@@ -284,7 +427,7 @@ export function createBodyWithProgress(
           const arrayBuffer: ArrayBuffer = await body.arrayBuffer()
           const bytes: Uint8Array = new Uint8Array(arrayBuffer)
           const actualTotalBytes: number = bytes.length
-          const chunkSize: number = Math.max(1024, Math.floor(actualTotalBytes / 100))
+          const chunkSize: number = Math.max(1024, Math.floor(actualTotalBytes / 1000))
           for (let i: number = 0; i < bytes.length; i += chunkSize) {
             const chunk: Uint8Array = bytes.slice(i, i + chunkSize)
             if (maxRate !== undefined && maxRate > 0) {
@@ -302,10 +445,13 @@ export function createBodyWithProgress(
       }
     })
   }
+  if (body instanceof FormData) {
+    return createFormDataStream(body, maxRate, onProgress, rateLimiter)
+  }
   const bodyBytes: Uint8Array = convertBodyToBytes(body)
   return new ReadableStream<Uint8Array>({
     async start(controller: ReadableStreamDefaultController<Uint8Array>): Promise<void> {
-      const chunkSize: number = Math.max(1024, Math.floor(totalBytes / 100))
+      const chunkSize: number = Math.max(1024, Math.floor(totalBytes / 1000))
       for (let i: number = 0; i < bodyBytes.length; i += chunkSize) {
         const chunk: Uint8Array = bodyBytes.slice(i, i + chunkSize)
         if (maxRate !== undefined && maxRate > 0) {

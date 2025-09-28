@@ -102,8 +102,7 @@ npm install @neabyte/fetch
 ## 📖 Quick Start
 
 ```typescript
-import fetch from '@neabyte/fetch'
-import type { FetchError } from '@neabyte/fetch'
+import fetch, { FetchError } from '@neabyte/fetch'
 
 // Simple GET request
 const users = await fetch.get('https://jsonplaceholder.typicode.com/users')

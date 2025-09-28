@@ -13,8 +13,8 @@ The library supports three authentication methods:
 
 ```typescript
 // ES Modules
-import fetch from '@neabyte/fetch'
-import type { AuthBasic, AuthBearer, AuthApiKey, FetchError } from '@neabyte/fetch'
+import fetch, { FetchError} from '@neabyte/fetch'
+import type { AuthBasic, AuthBearer, AuthApiKey } from '@neabyte/fetch'
 
 // CommonJS
 const fetch = require('@neabyte/fetch').default

@@ -41,7 +41,7 @@ const plugins = [
     declaration: false,
     declarationMap: false,
     sourceMap: false,
-    exclude: ['**/*.test.ts', '**/*.spec.ts', '**/tests/**', '**/test/**']
+    exclude: ['**/*.test.ts', '**/*.spec.ts', '**/tests/**', '**/test/**', '**/examples/**']
   }),
   terser({
     compress: {

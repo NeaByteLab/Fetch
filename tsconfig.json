@@ -5,14 +5,14 @@
     "moduleResolution": "bundler",
     "moduleDetection": "force",
     "outDir": "./dist",
-    "rootDir": "src",
+    "rootDir": ".",
     "baseUrl": ".",
     "paths": {
       "@root/*": ["src/*"],
       "@constants/*": ["src/constants/*"],
       "@core/*": ["src/core/*"],
       "@interfaces/*": ["src/interfaces/*"],
-      "@utils/*": ["src/utils/*"],
+      "@utils/*": ["src/utils/*"]
     },
     "tsBuildInfoFile": ".tsbuildinfo",
     "importsNotUsedAsValues": "remove",
@@ -45,6 +45,6 @@
     "useUnknownInCatchVariables": true,
     "verbatimModuleSyntax": true
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "examples/**/*"],
   "exclude": ["node_modules", "dist"]
 }

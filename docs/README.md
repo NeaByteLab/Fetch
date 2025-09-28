@@ -28,7 +28,7 @@ For installation and basic setup, see the main [README](../README.md).
 
 ```typescript
 // Main class
-import fetch from '@neabyte/fetch'
+import fetch, { FetchError } from '@neabyte/fetch'
 
 // TypeScript types
 import type {
@@ -37,7 +37,6 @@ import type {
   AuthBearer,
   AuthConfig,
   BalancerConfig,
-  FetchError,
   FetchOptions,
   FetchRequestBody,
   FetchResponse,
@@ -93,7 +92,20 @@ interface FetchOptions {
 
 ## 📖 Examples
 
-Detailed examples are organized by category:
+### 🚀 TypeScript Examples (Live Code)
+Ready-to-run TypeScript examples with full type safety:
+
+- [General Usage](../examples/general-usage.ts) - Using all available HTTP methods
+- [Request Balancer](../examples/request-balancer.ts) - Load balancing and failover examples
+
+### 💻 How To Run
+```sh
+cd <path>/<project-name>
+npx tsx ./examples/filename.ts
+```
+
+### 📚 Documentation Examples
+Detailed markdown examples with explanations:
 
 - [Basic Usage](./examples/basic-usage.md) - HTTP methods and common usage patterns
 - [Authentication](./examples/authentication.md) - Basic, Bearer, and API key authentication

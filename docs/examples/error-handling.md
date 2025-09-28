@@ -17,8 +17,7 @@ The library throws `FetchError` for most errors and standard `Error` for some va
 ### Example 1: HTTP Status Errors
 
 ```typescript
-import fetch from '@neabyte/fetch'
-import type { FetchError } from '@neabyte/fetch'
+import fetch, { FetchError } from '@neabyte/fetch'
 
 try {
   const response = await fetch.get('https://httpbin.org/status/404')

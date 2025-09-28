@@ -228,6 +228,7 @@ export default class FetchClient {
       balancer?: { endpoints: string[]; strategy: 'fastest' | 'parallel' }
       forwarder?: ForwarderEndpoint<T>[]
       sslPinning?: string[]
+      maxRate?: number
     } = {
       ...this.defaultConfig,
       ...options
@@ -304,6 +305,7 @@ export default class FetchClient {
       signal?: AbortSignal
       body?: FetchRequestBody
       sslPinning?: string[]
+      maxRate?: number
     }
   ): Promise<{ success: true; data: T } | { success: false; error: unknown }> {
     let controller: ReturnType<typeof createTimeoutController> | undefined
@@ -314,7 +316,16 @@ export default class FetchClient {
       if (config.sslPinning && config.sslPinning.length > 0) {
         await ExtractSSL.validate(fullUrl, config.sslPinning)
       }
-      const fetchOptions: RequestInit = buildRequestInit(method, config, controller)
+      console
+        .log
+        // `Fetch.executeRequest: onProgress=${!!config.onProgress}, maxRate=${config.maxRate}`
+        ()
+      const fetchOptions: RequestInit = buildRequestInit(
+        method,
+        config,
+        controller,
+        config.onProgress
+      )
       const response: Response = await globalThis.fetch(fullUrl, fetchOptions)
       if (controller) {
         cleanupController(controller)
@@ -433,7 +444,7 @@ export default class FetchClient {
         url,
         balancer,
         async (
-          endpoint: string
+          fullUrl: string
         ): Promise<{ success: true; data: T } | { success: false; error: unknown }> => {
           try {
             const balancerConfig: typeof baseConfig = { ...baseConfig }
@@ -442,14 +453,14 @@ export default class FetchClient {
               balancerConfig.headers = { ...balancerConfig.headers, ...authHeaders }
             }
             const response: FetchResponse<T> = await RetryHandler.executeWithRetries<T>(
-              endpoint,
+              fullUrl,
               {
                 retries: baseConfig.retries,
                 timeout: baseConfig.timeout,
                 download: baseConfig.download,
                 ...baseConfig.filename !== undefined ? { filename: baseConfig.filename } : {}
               },
-              () => this.executeRequest<T>(method, endpoint, balancerConfig),
+              () => this.executeRequest<T>(method, fullUrl, balancerConfig),
               honorRetryAfterIfPresent
             )
             return { success: true, data: response as T }

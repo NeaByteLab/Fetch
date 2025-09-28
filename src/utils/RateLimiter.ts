@@ -67,7 +67,7 @@ export class RateLimiter {
     const delayMs: number = tokensNeeded / this.refillRate
     this.tokens = 0
     this.transferredBytes += bytesToTransfer
-    return Math.min(delayMs, 2000)
+    return delayMs
   }
 
   /**

@@ -44,5 +44,5 @@ export type BalancerResult<T> =
  * @description Function type for executing individual requests in load balancer.
  */
 export type BalancerExecutor<T> = (
-  endpoint: string
+  fullUrl: string
 ) => Promise<{ success: true; data: T } | { success: false; error: unknown }>
