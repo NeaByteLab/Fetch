@@ -82,6 +82,7 @@ export const errorMessages: {
   readonly ABORTED: string
   readonly BALANCER_ENDPOINTS_REQUIRED: string
   readonly BALANCER_STRATEGY_INVALID: string
+  readonly BASE64_ENCODING_NOT_AVAILABLE: string
   readonly CONTENT_TYPE_NULL: string
   readonly FILENAME_REQUIRED: string
   readonly FILENAME_UNDEFINED: string
@@ -90,6 +91,10 @@ export const errorMessages: {
   readonly RESPONSE_BODY_NULL: string
   readonly RESPONSE_TOO_LARGE: string
   readonly RETRIES_NON_NEGATIVE: string
+  readonly SSL_BROWSER_NOT_SUPPORTED: string
+  readonly SSL_CERTIFICATE_EXTRACTION_FAILED: string
+  readonly SSL_PINNING_VALIDATION_ERROR: string
+  readonly SSL_PINNING_VALIDATION_FAILED: string
   readonly STREAM_PARSE_PREFIX: string
   readonly TIMEOUT_NON_NEGATIVE: string
   readonly UNKNOWN_ERROR: string
@@ -98,6 +103,7 @@ export const errorMessages: {
   ABORTED: 'Request timeout - operation exceeded the specified timeout duration',
   BALANCER_ENDPOINTS_REQUIRED: 'Balancer endpoints are required and must be a non-empty array',
   BALANCER_STRATEGY_INVALID: 'Balancer strategy must be either "fastest" or "parallel"',
+  BASE64_ENCODING_NOT_AVAILABLE: 'Base64 encoding not available in this environment',
   CONTENT_TYPE_NULL: 'Content type is null',
   FILENAME_REQUIRED: 'Filename is required when download is enabled',
   FILENAME_UNDEFINED: 'Filename is undefined',
@@ -106,6 +112,11 @@ export const errorMessages: {
   RESPONSE_BODY_NULL: 'Response body is null',
   RESPONSE_TOO_LARGE: 'Response too large',
   RETRIES_NON_NEGATIVE: 'Retries must be a non-negative number',
+  SSL_BROWSER_NOT_SUPPORTED:
+    'SSL pinning is not supported in browser environments. Use Node.js runtime.',
+  SSL_CERTIFICATE_EXTRACTION_FAILED: 'SSL certificate extraction failed',
+  SSL_PINNING_VALIDATION_ERROR: 'SSL pinning validation error',
+  SSL_PINNING_VALIDATION_FAILED: 'SSL pinning validation failed',
   STREAM_PARSE_PREFIX: 'Failed to parse streaming response: ',
   TIMEOUT_NON_NEGATIVE: 'Timeout must be a non-negative number',
   UNKNOWN_ERROR: 'Unknown error',

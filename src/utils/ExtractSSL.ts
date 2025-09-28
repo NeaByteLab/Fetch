@@ -15,6 +15,7 @@
  */
 
 import { FetchError } from '@interfaces/index'
+import { errorMessages } from '@constants/index'
 import type { PeerCertificate } from 'node:tls'
 import { createHash } from 'node:crypto'
 import { URL } from 'node:url'
@@ -34,12 +35,7 @@ export class ExtractSSL {
    */
   static async process(targetUrl: string): Promise<string | null> {
     if (typeof window !== 'undefined') {
-      throw new FetchError(
-        'SSL pinning is not supported in browser environments. Use Node.js runtime.',
-        undefined,
-        undefined,
-        targetUrl
-      )
+      throw new FetchError(errorMessages.SSL_BROWSER_NOT_SUPPORTED, undefined, undefined, targetUrl)
     }
     try {
       const { hostname, port }: { hostname: string; port: string } = new URL(targetUrl)
@@ -147,12 +143,7 @@ export class ExtractSSL {
    */
   static async validate(url: string, pins: string[]): Promise<void> {
     if (typeof window !== 'undefined') {
-      throw new FetchError(
-        'SSL pinning is not supported in browser environments. Use Node.js runtime.',
-        undefined,
-        undefined,
-        url
-      )
+      throw new FetchError(errorMessages.SSL_BROWSER_NOT_SUPPORTED, undefined, undefined, url)
     }
     const maxPins: number = 20
     const limitedPins: string[] = pins.slice(0, maxPins)
@@ -162,25 +153,25 @@ export class ExtractSSL {
     try {
       const certHash: string | null = await this.process(url)
       if (certHash == null || certHash === '') {
-        throw new FetchError('SSL certificate extraction failed', undefined, undefined, url)
+        throw new FetchError(
+          errorMessages.SSL_CERTIFICATE_EXTRACTION_FAILED,
+          undefined,
+          undefined,
+          url
+        )
       }
       const isValidPin: boolean = limitedPins.some((pin: string) => {
         return certHash.slice(0, 50) === pin.slice(0, 50)
       })
       if (!isValidPin) {
-        throw new FetchError(
-          `SSL pinning validation failed. Certificate hash: ${certHash}, Expected pins: ${limitedPins.join(', ')}`,
-          undefined,
-          undefined,
-          url
-        )
+        throw new FetchError(errorMessages.SSL_PINNING_VALIDATION_FAILED, undefined, undefined, url)
       }
     } catch (error) {
       if (error instanceof FetchError) {
         throw error
       }
       throw new FetchError(
-        `SSL pinning validation error: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        `${errorMessages.SSL_PINNING_VALIDATION_ERROR}: ${error instanceof Error ? error.message : errorMessages.UNKNOWN_ERROR}`,
         undefined,
         undefined,
         url

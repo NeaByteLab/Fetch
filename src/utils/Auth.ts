@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import type { AuthConfig } from '@interfaces/Auth'
+import { FetchError, type AuthConfig } from '@interfaces/index'
+import { errorMessages } from '@constants/index'
 
 /**
  * Base64 encodes a string for basic authentication
@@ -29,7 +30,7 @@ function base64Encode(str: string): string {
   if (typeof Buffer !== 'undefined') {
     return Buffer.from(str, 'utf8').toString('base64')
   }
-  throw new Error('Base64 encoding not available in this environment')
+  throw new FetchError(errorMessages.BASE64_ENCODING_NOT_AVAILABLE, undefined, undefined, '')
 }
 
 /**

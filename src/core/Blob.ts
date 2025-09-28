@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+import { FetchError } from '@interfaces/index'
 import { contentTypes, headers, errorMessages } from '@constants/index'
 import { createRateLimiter } from '@utils/index'
 
@@ -46,7 +47,7 @@ type DownloadConfig = {
  */
 export async function handleDownload(response: Response, config: DownloadConfig): Promise<void> {
   if (config.filename === undefined || config.filename.trim() === '') {
-    throw new Error(errorMessages.FILENAME_REQUIRED)
+    throw new FetchError(errorMessages.FILENAME_REQUIRED, undefined, undefined, '')
   }
   if (config.onProgress !== undefined && response.body !== null) {
     await handleDownloadWithProgress(response, config)
@@ -73,7 +74,7 @@ async function handleDownloadWithProgress(
     await downloadWithProgressTracking(response, config, total)
   } else {
     if (config.filename === undefined) {
-      throw new Error(errorMessages.FILENAME_UNDEFINED)
+      throw new FetchError(errorMessages.FILENAME_UNDEFINED, undefined, undefined, '')
     }
     await handleDirectDownload(response, config.filename)
   }
@@ -123,13 +124,13 @@ async function downloadWithProgressTracking(
   total: number
 ): Promise<void> {
   if (response.body === null) {
-    throw new Error(errorMessages.RESPONSE_BODY_NULL)
+    throw new FetchError(errorMessages.RESPONSE_BODY_NULL, undefined, undefined, '')
   }
   if (config.onProgress === undefined) {
-    throw new Error(errorMessages.PROGRESS_CALLBACK_UNDEFINED)
+    throw new FetchError(errorMessages.PROGRESS_CALLBACK_UNDEFINED, undefined, undefined, '')
   }
   if (config.filename === undefined) {
-    throw new Error(errorMessages.FILENAME_UNDEFINED)
+    throw new FetchError(errorMessages.FILENAME_UNDEFINED, undefined, undefined, '')
   }
   let received: number = 0
   const chunks: Uint8Array[] = []
