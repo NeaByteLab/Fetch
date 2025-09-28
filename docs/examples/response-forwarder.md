@@ -2,20 +2,6 @@
 
 This guide covers practical examples for using the Response Forwarder feature.
 
-## 📦 Import & Setup
-
-```typescript
-// ES Modules
-import fetch from '@neabyte/fetch'
-
-// CommonJS
-const fetch = require('@neabyte/fetch').default
-
-// TypeScript with types
-import fetch from '@neabyte/fetch'
-import type { FetchError, FetchOptions, FetchResponse } from '@neabyte/fetch'
-```
-
 ## 🔥 Basic Forwarding Examples
 
 ### Simple Logging

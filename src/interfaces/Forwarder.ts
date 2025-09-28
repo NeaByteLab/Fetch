@@ -1,4 +1,20 @@
 /**
+ * @license
+ * Copyright 2025 NeaByteLab
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * Function type for dynamic body generation.
  * @description Function that receives the original response and returns the body to forward.
  */
@@ -21,6 +37,8 @@ export interface ForwarderEndpoint<T = unknown> {
   timeout?: number
   /** Number of retry attempts for this forwarder endpoint */
   retries?: number
+  /** SSL pinning hashes for certificate validation */
+  sslPinning?: string[]
 }
 
 /**
@@ -53,7 +71,8 @@ export type ForwarderExecutor = (
   endpoint: string,
   method: string,
   body?: unknown,
-  headers?: Record<string, string>
+  headers?: Record<string, string>,
+  sslPinning?: string[]
 ) => Promise<{ success: true; data: unknown } | { success: false; error: unknown }>
 
 /**

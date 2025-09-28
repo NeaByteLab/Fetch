@@ -1,3 +1,19 @@
+/**
+ * @license
+ * Copyright 2025 NeaByteLab
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import {
   FetchError,
   type AuthConfig,
@@ -19,6 +35,7 @@ import {
   StreamHandler
 } from '@core/index'
 import {
+  ExtractSSL,
   cleanupController,
   createTimeoutController,
   createAuthHeaders,
@@ -41,6 +58,7 @@ export default class FetchClient {
     filename?: string
     responseType: 'auto' | 'json' | 'text' | 'buffer' | 'blob'
     onProgress?: (percentage: number) => void
+    sslPinning?: string[]
   } = {
     timeout: defaults.TIMEOUT_MS,
     retries: defaults.RETRIES,
@@ -209,6 +227,7 @@ export default class FetchClient {
       auth?: AuthConfig
       balancer?: { endpoints: string[]; strategy: 'fastest' | 'parallel' }
       forwarder?: ForwarderEndpoint<T>[]
+      sslPinning?: string[]
     } = {
       ...this.defaultConfig,
       ...options
@@ -281,12 +300,19 @@ export default class FetchClient {
   private static async executeRequest<T>(
     method: string,
     fullUrl: string,
-    config: typeof FetchClient.defaultConfig & { signal?: AbortSignal; body?: FetchRequestBody }
+    config: typeof FetchClient.defaultConfig & {
+      signal?: AbortSignal
+      body?: FetchRequestBody
+      sslPinning?: string[]
+    }
   ): Promise<{ success: true; data: T } | { success: false; error: unknown }> {
     let controller: ReturnType<typeof createTimeoutController> | undefined
     try {
       if (!config.signal) {
         controller = createTimeoutController(config.timeout)
+      }
+      if (config.sslPinning && config.sslPinning.length > 0) {
+        await ExtractSSL.validate(fullUrl, config.sslPinning)
       }
       const fetchOptions: RequestInit = buildRequestInit(method, config, controller)
       const response: Response = await globalThis.fetch(fullUrl, fetchOptions)
@@ -455,11 +481,18 @@ export default class FetchClient {
     await ForwarderHandler.forwardResponse(
       responseData,
       forwarderConfig,
-      (endpoint: string, forwardMethod: string, body?: unknown, headers?: Record<string, string>) =>
+      (
+        endpoint: string,
+        forwardMethod: string,
+        body?: unknown,
+        headers?: Record<string, string>,
+        sslPinning?: string[]
+      ) =>
         this.executeRequest(forwardMethod, endpoint, {
           ...baseConfig,
           body: body as FetchRequestBody,
-          headers: headers ?? {}
+          headers: headers ?? {},
+          ...sslPinning ? { sslPinning } : {}
         })
     )
   }

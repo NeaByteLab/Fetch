@@ -75,6 +75,9 @@ interface FetchOptions {
   // Response parsing type (default: 'auto')
   responseType?: 'auto' | 'json' | 'text' | 'buffer' | 'blob'
 
+  // Security
+  sslPinning?: string[]                  // SSL certificate pinning hashes (max 20)
+
   // Additional features
   body?: FetchRequestBody                // Request body data
   maxRate?: number                       // Rate limiting in bytes per second
@@ -94,6 +97,7 @@ Detailed examples are organized by category:
 
 - [Basic Usage](./examples/basic-usage.md) - HTTP methods and common usage patterns
 - [Authentication](./examples/authentication.md) - Basic, Bearer, and API key authentication
+- [SSL Pinning](./examples/ssl-pinning.md) - SSL certificate pinning for enhanced security
 - [Advanced Usage](./examples/advanced-usage.md) - Configuration options and patterns
 - [Error Handling](./examples/error-handling.md) - Error handling patterns
 - [Request Balancer](./examples/request-balancer.md) - Load balancing and failover examples

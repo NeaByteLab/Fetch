@@ -11,7 +11,7 @@
       <img alt="npm version" src="https://img.shields.io/npm/v/@neabyte/fetch.svg?color=red">
     </a>
     <a href="https://github.com/NeaByteLab/Fetch/blob/main/LICENSE">
-      <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT">
+      <img src="https://img.shields.io/badge/License-Apache%202.0-blue.svg" alt="License: Apache 2.0">
     </a>
     <a href="https://bundlephobia.com/result?p=@neabyte/fetch">
       <img src="https://badgen.net/bundlephobia/minzip/@neabyte/fetch" alt="Bundle Size">
@@ -54,6 +54,7 @@
 
 - 🌐 **Universal Support** - Browser and Node.js
 - 🔐 **Authentication** - Basic, Bearer, and API key authentication
+- 🔒 **SSL Pinning** - Certificate validation with SHA-256 pinning
 - ❌ **Request Cancellation** - `AbortSignal` support
 - ⏱️ **Timeout Control** - Configurable timeouts (default: 30s)
 - 🔄 **Retry Logic** - Exponential backoff with Retry-After header support
@@ -64,7 +65,7 @@
 - 📥 **File Downloads** - Cross-platform file downloads
 - ⚖️ **Request Balancer** - Load balance requests across multiple endpoints
 - 📨 **Response Forwarder** - Forward responses to multiple endpoints
-- 🛡️ **Error Handling** - Structured errors with full context
+- 🛡️ **Error Handling** - Detailed error information with status codes
 
 ---
 
@@ -161,4 +162,4 @@ For detailed examples and usage patterns, see the [documentation](./docs/README.
 
 ## 📄 License
 
-This project is licensed under the MIT license. See the [LICENSE](LICENSE) file for more info.
+This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for more info.

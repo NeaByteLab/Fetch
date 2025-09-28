@@ -2,20 +2,6 @@
 
 This guide covers practical examples for using the Request Balancer feature.
 
-## 📦 Import & Setup
-
-```typescript
-// ES Modules
-import fetch from '@neabyte/fetch'
-
-// CommonJS
-const fetch = require('@neabyte/fetch').default
-
-// TypeScript with types
-import fetch from '@neabyte/fetch'
-import type { FetchError, FetchOptions, FetchResponse } from '@neabyte/fetch'
-```
-
 ## 🚀 Fastest Strategy Examples
 
 ### Basic Fastest Strategy

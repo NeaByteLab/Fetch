@@ -263,6 +263,7 @@ try {
 ## 🚀 Next Steps
 
 - [Authentication](./authentication.md) - Basic, Bearer, and API key authentication
+- [SSL Pinning](./ssl-pinning.md) - SSL certificate pinning for enhanced security
 - [Advanced Usage](./advanced-usage.md) - Configuration options and patterns
 - [Error Handling](./error-handling.md) - Error handling patterns
 - [Request Balancer](./request-balancer.md) - Load balancing and failover examples
