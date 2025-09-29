@@ -15,7 +15,7 @@
  */
 
 import { contentTypes, httpMethods, headers, errorMessages, misc } from '@constants/index'
-import { FetchError } from '@interfaces/index'
+import { FetchError, type FetchResponseType } from '@interfaces/index'
 
 /**
  * Attempts to parse JSON with fallback to text.
@@ -120,7 +120,7 @@ export async function parseByContentType<T>(
 export async function parseResponseByType<T>(
   response: Response,
   config: {
-    responseType: 'auto' | 'json' | 'text' | 'buffer' | 'blob'
+    responseType: FetchResponseType
   },
   method?: string
 ): Promise<T> {
@@ -232,7 +232,7 @@ export async function parseResponseWithProgressTracking<T>(
 export async function parseResponseWithProgress<T>(
   response: Response,
   config: {
-    responseType: 'auto' | 'json' | 'text' | 'buffer' | 'blob'
+    responseType: FetchResponseType
     onProgress?: (percentage: number) => void
   },
   url: string,
