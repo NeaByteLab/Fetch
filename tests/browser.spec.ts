@@ -181,7 +181,9 @@ test.describe('@neabyte/fetch Module Loading Tests', () => {
       })
       expect(result.isOptionsRequest).toBe(true)
       if (result.success) {
-        expect(result.data).toBeUndefined()
+        expect(result.data).toBeDefined()
+        expect(result.data.status).toBe(200)
+        expect(result.data.ok).toBe(true)
       } else {
         expect(result.isExpectedRejection).toBe(true)
       }
@@ -609,6 +611,94 @@ test.describe('@neabyte/fetch Module Loading Tests', () => {
       })
       expect(result.success).toBe(true)
       expect(result.isBlob).toBe(true)
+    })
+  })
+
+  test.describe('Cookie Management', () => {
+    test('should have cookie jar available', async () => {
+      const result = await page.evaluate(async () => {
+        return {
+          cookieJarExists: !!window.fetchClient.cookieJar,
+          cookieJarType: typeof window.fetchClient.cookieJar,
+          hasSetCookieMethod: typeof window.fetchClient.cookieJar?.setCookie === 'function',
+          hasGetCookiesMethod: typeof window.fetchClient.cookieJar?.getCookies === 'function',
+          hasClearMethod: typeof window.fetchClient.cookieJar?.clear === 'function'
+        }
+      })
+      expect(result.cookieJarExists).toBe(true)
+      expect(result.cookieJarType).toBe('object')
+      expect(result.hasSetCookieMethod).toBe(true)
+      expect(result.hasGetCookiesMethod).toBe(true)
+      expect(result.hasClearMethod).toBe(true)
+    })
+
+    test('should handle manual cookie operations', async () => {
+      const result = await page.evaluate(async () => {
+        try {
+          if (!window.fetchClient.cookieJar) {
+            return {
+              success: false,
+              error: 'Cookie jar not available'
+            }
+          }
+
+          const cookieJar = window.fetchClient.cookieJar
+
+          // Clear cookies
+          cookieJar.clear()
+          const initialSize = cookieJar.cookies.size
+
+          // Set a cookie manually
+          cookieJar.setCookie({
+            name: 'manual-cookie',
+            value: 'manual-value'
+          })
+
+          const afterSetSize = cookieJar.cookies.size
+          const cookieString = cookieJar.getCookies()
+
+          return {
+            success: true,
+            initialSize,
+            afterSetSize,
+            cookieString,
+            hasManualCookie: cookieString.includes('manual-cookie=manual-value')
+          }
+        } catch (error) {
+          return {
+            success: false,
+            error: error.message
+          }
+        }
+      })
+      expect(result.success).toBe(true)
+      expect(result.initialSize).toBe(0)
+      expect(result.afterSetSize).toBe(1)
+      expect(result.hasManualCookie).toBe(true)
+    })
+
+    test('should handle withCookies option', async () => {
+      const result = await page.evaluate(async () => {
+        try {
+          // Test that withCookies option doesn't break requests
+          const data = await window.fetchClient.get('https://httpbin.org/get', {
+            withCookies: true
+          })
+          return {
+            success: true,
+            hasData: !!data,
+            withCookiesEnabled: true
+          }
+        } catch (error) {
+          return {
+            success: false,
+            error: error.message,
+            withCookiesEnabled: false
+          }
+        }
+      })
+      expect(result.success).toBe(true)
+      expect(result.withCookiesEnabled).toBe(true)
     })
   })
 

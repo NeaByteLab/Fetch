@@ -15,12 +15,16 @@
  */
 
 /**
- * Public interfaces and types.
- * @description Re-exports all interface and type definitions.
+ * Cookie interface for storage and management.
+ * @description Simple cookie representation with essential properties.
  */
-export * from '@interfaces/Auth'
-export * from '@interfaces/Balancer'
-export * from '@interfaces/Cookie'
-export * from '@interfaces/Fetch'
-export * from '@interfaces/Forwarder'
-export * from '@interfaces/Timeout'
+export interface Cookie {
+  /** Cookie name */
+  name: string
+  /** Cookie value */
+  value: string
+  /** Optional domain restriction */
+  domain?: string
+  /** Optional path restriction */
+  path?: string
+}

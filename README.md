@@ -55,6 +55,7 @@
 - 🌐 **Universal Support** - Browser and Node.js
 - 🔐 **Authentication** - Basic, Bearer, and API key authentication
 - 🔒 **SSL Pinning** - Certificate validation with SHA-256 pinning
+- 🍪 **Cookie Management** - Automatic cookie handling for browser and Node.js
 - ❌ **Request Cancellation** - `AbortSignal` support
 - ⏱️ **Timeout Control** - Configurable timeouts (default: 30s)
 - 🔄 **Retry Logic** - Exponential backoff with Retry-After header support
@@ -136,6 +137,11 @@ const result = await fetch.post('https://api.example.com/upload', fileData, {
   maxRate: 50 * 1024, // 50KB/s
   onProgress: (percentage) => console.log(`Upload: ${percentage}%`)
 })
+
+// Cookie management (automatic in browser, manual in Node.js)
+const response = await fetch.get('https://api.example.com/data', {
+  withCookies: true // Enables cookie handling
+})
 ```
 
 For detailed examples and usage patterns, see the [documentation](./docs/README.md).
@@ -145,7 +151,6 @@ For detailed examples and usage patterns, see the [documentation](./docs/README.
 ## 🗺️ Roadmap
 
 ### 🔮 **Planned Features**
-- [ ] **Cookie Management** - Cookie handling
 - [ ] **HTTP Proxy Support** - HTTP proxy connections
 - [ ] **Proxy Authentication** - Username/password for proxies
 - [ ] **Request/Response Interceptors** - Request and response modification

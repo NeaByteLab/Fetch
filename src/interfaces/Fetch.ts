@@ -78,6 +78,8 @@ export interface FetchOptions {
   stream?: boolean
   /** Request timeout in milliseconds */
   timeout?: number
+  /** Enable cookie management */
+  withCookies?: boolean
 }
 
 /**

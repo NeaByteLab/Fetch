@@ -41,7 +41,8 @@ import {
   createTimeoutController,
   createAuthHeaders,
   honorRetryAfterIfPresent,
-  parseResponseWithProgress
+  parseResponseWithProgress,
+  CookieJar
 } from '@utils/index'
 
 /**
@@ -49,6 +50,9 @@ import {
  * @description Provides static convenience methods for common HTTP verbs and a configurable request pipeline.
  */
 export default class FetchClient {
+  /** Cookie jar for storing and managing cookies */
+  private static readonly _cookieJar: CookieJar = new CookieJar()
+  /** Default configuration for the FetchClient */
   private static readonly defaultConfig: {
     timeout: number
     retries: number
@@ -230,6 +234,7 @@ export default class FetchClient {
       forwarder?: ForwarderEndpoint<T>[]
       sslPinning?: string[]
       maxRate?: number
+      withCookies?: boolean
     } = {
       ...this.defaultConfig,
       ...options
@@ -292,12 +297,84 @@ export default class FetchClient {
   }
 
   /**
-   * Executes a single HTTP attempt.
+   * Gets the cookie jar instance for testing and inspection.
+   * @description Provides access to the internal cookie jar for testing purposes.
+   * @returns The cookie jar instance
+   */
+  static get cookieJar(): CookieJar {
+    return this._cookieJar
+  }
+
+  /**
+   * Processes Set-Cookie headers from response.
+   * @description Handles multiple Set-Cookie headers with fallback.
+   * @param response - Response containing Set-Cookie headers
+   */
+  private static processSetCookieHeaders(response: Response): void {
+    const setCookieHeaders: string[] = response.headers.getSetCookie?.() ?? []
+    if (setCookieHeaders.length > 0) {
+      setCookieHeaders.forEach((setCookieHeader: string) => {
+        this._cookieJar.parseSetCookie(setCookieHeader)
+      })
+    } else {
+      const setCookieHeader: string | null = response.headers.get('Set-Cookie')
+      if (setCookieHeader !== null && setCookieHeader !== '') {
+        this._cookieJar.parseSetCookie(setCookieHeader)
+      }
+    }
+  }
+
+  /**
+   * Handles cookie configuration for browser environment.
+   * @description Sets credentials to include for automatic cookie handling and processes Set-Cookie headers.
+   * @param fetchOptions - Request options to modify
+   * @param withCookies - Whether to enable cookies
+   * @param response - Response to process for Set-Cookie headers
+   */
+  private static handleBrowserCookies(
+    fetchOptions: RequestInit,
+    withCookies: boolean,
+    response?: Response
+  ): void {
+    if (withCookies === true && typeof globalThis.window !== 'undefined') {
+      fetchOptions.credentials = 'include'
+      if (response) {
+        this.processSetCookieHeaders(response)
+      }
+    }
+  }
+
+  /**
+   * Handles cookie configuration for Node.js environment.
+   * @description Adds Cookie header and processes Set-Cookie response headers.
+   * @param fetchOptions - Request options to modify
+   * @param withCookies - Whether to enable cookies
+   * @param response - Response to process for Set-Cookie headers
+   */
+  private static handleNodeCookies(
+    fetchOptions: RequestInit,
+    withCookies: boolean,
+    response?: Response
+  ): void {
+    if (withCookies === true && typeof globalThis.window === 'undefined') {
+      if (response) {
+        this.processSetCookieHeaders(response)
+      } else {
+        const cookieHeader: string = this._cookieJar.getCookies()
+        if (cookieHeader !== '') {
+          fetchOptions.headers = { ...fetchOptions.headers, Cookie: cookieHeader }
+        }
+      }
+    }
+  }
+
+  /**
+   * Executes a single HTTP request attempt.
    * @description Performs a single HTTP request with timeout, error handling, and response processing.
-   * @param method - HTTP method
-   * @param fullUrl - Fully built URL
-   * @param config - Effective configuration
-   * @returns Success flag with data or error
+   * @param method - HTTP method to use
+   * @param fullUrl - Fully built URL for the request
+   * @param config - Request configuration including cookies, SSL pinning, and other options
+   * @returns Promise resolving to success with data or failure with error
    */
   private static async executeRequest<T>(
     method: string,
@@ -307,6 +384,7 @@ export default class FetchClient {
       body?: FetchRequestBody
       sslPinning?: string[]
       maxRate?: number
+      withCookies?: boolean
     }
   ): Promise<{ success: true; data: T } | { success: false; error: unknown }> {
     let controller: ReturnType<typeof createTimeoutController> | undefined
@@ -323,7 +401,11 @@ export default class FetchClient {
         controller,
         config.onProgress
       )
+      this.handleBrowserCookies(fetchOptions, config.withCookies ?? false)
+      this.handleNodeCookies(fetchOptions, config.withCookies ?? false)
       const response: Response = await globalThis.fetch(fullUrl, fetchOptions)
+      this.handleBrowserCookies(fetchOptions, config.withCookies ?? false, response)
+      this.handleNodeCookies(fetchOptions, config.withCookies ?? false, response)
       if (controller) {
         cleanupController(controller)
       }
@@ -349,7 +431,20 @@ export default class FetchClient {
         return await this.handleDownloadResponse<T>(response, config)
       }
       if (method === httpMethods.HEAD || method === httpMethods.OPTIONS) {
-        return { success: true, data: undefined as T }
+        const headers: Record<string, string> = {}
+        response.headers.forEach((value: string, key: string) => {
+          headers[key] = value
+        })
+        return {
+          success: true,
+          data: {
+            status: response.status,
+            statusText: response.statusText,
+            headers,
+            url: response.url,
+            ok: response.ok
+          } as T
+        }
       }
       type ParseConfig = {
         responseType: FetchResponseType

@@ -104,6 +104,8 @@ interface FetchOptions {
   stream?: boolean
   /** Request timeout in milliseconds */
   timeout?: number
+  /** Enable cookie management */
+  withCookies?: boolean
 }
 ```
 
@@ -136,6 +138,7 @@ Guides with markdown explanations and TypeScript code:
   - 📁 [TypeScript Code | ./examples/streaming.ts](../examples/streaming.ts)
 
 #### 🚧 Pending Examples
+- [Cookie Management](./examples/cookie-management.md) - Cookie handling and management
 - [Advanced Usage](./examples/advanced-usage.md) - Configuration options and patterns
 - [Error Handling](./examples/error-handling.md) - Error handling patterns
 

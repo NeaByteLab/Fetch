@@ -143,6 +143,12 @@ export function createHeaders(headers: Record<string, string> = {}): Headers {
 export * from '@utils/Auth'
 
 /**
+ * Re-exports cookie management utilities.
+ * @description Provides cookie jar for storing and managing cookies.
+ */
+export * from '@utils/CookieJar'
+
+/**
  * Re-exports extract SSL utilities.
  * @description Provides SSL certificate extraction utilities.
  */
